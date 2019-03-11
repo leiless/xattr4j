@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Created-By: __JAVA_VERSION__ (Oracle Corporation)
+
+Name: __NAME__
+Implementation-Title: __TITLE__
+Implementation-Vendor: __VENDOR__
+Implementation-Version: __VERSION__
+
