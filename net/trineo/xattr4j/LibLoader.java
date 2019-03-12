@@ -13,12 +13,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 final class LibLoader {
-    private static <T> T checkNotNull(T ref) {
-        if (ref != null) return ref;
-        throw new NullPointerException();
+    private static void checkNotNull(Object ref) {
+        if (ref == null) throw new NullPointerException();
     }
 
-    public static void loadlib(String name) throws IOException {
+    static void loadlib(String name) throws IOException {
         checkNotNull(name);
 
         /*
@@ -52,7 +51,7 @@ final class LibLoader {
             OutputStream out = null;
 
             try {
-                byte[] buff = new byte[4096];
+                byte[] buff = new byte[8192];
                 out = new FileOutputStream(file);
 
                 int len;
@@ -67,4 +66,3 @@ final class LibLoader {
         }
     }
 }
-
