@@ -125,12 +125,15 @@ static char exc_buff[EXC_BUFSZ];
  * @cls     Exception class
  * @fmt     Exception message format
  * @...     Exception message parameters
+ * XXX: errno must be set before call
  */
 static void throw_exc(JNIEnv *env, jclass cls, const char *fmt, ...)
 {
     int sz;
     jint e;
     va_list ap;
+
+    assert(errno != 0);
 
     va_start(ap, fmt);
     spin_lock();
