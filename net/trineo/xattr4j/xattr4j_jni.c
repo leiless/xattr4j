@@ -16,6 +16,7 @@
 #include <errno.h>          /* for DEBUG */
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include <unistd.h>
 #include <sys/xattr.h>
 #include "xattr4j_jni.h"
@@ -115,32 +116,33 @@ static int __k = 0;
     assert(ok);                         \
 } while (0)
 
-#define EXC_BUFSZ 2048
+#define EXC_BUFSZ   8192
 static char exc_buff[EXC_BUFSZ];
 
 /**
- * __FILE__ info is ignored since it's trivial
- *
- * __func__ info not attach to the static buffer
- *  since the stack trace already done that for us
- *
- * XXX: errno must be set properly before call
+ * Throw an exception
+ * @env     JNI environment
+ * @cls     Exception class
+ * @fmt     Exception message format
+ * @...     Exception message parameters
  */
-static void throw_exc(JNIEnv *env, jclass cls, const char *msg, int line)
+static void throw_exc(JNIEnv *env, jclass cls, const char *fmt, ...)
 {
     int sz;
     jint e;
+    va_list ap;
 
+    va_start(ap, fmt);
     spin_lock();
     /*
      * We use static buffer simply :. the exception itself may caused by OOM
      *  in such case further malloc(3) will fail again
      */
-    sz = snprintf(exc_buff, EXC_BUFSZ,
-                "(native) %s: line: %d errno: %d", msg, line, errno);
+    sz = vsnprintf(exc_buff, EXC_BUFSZ, fmt, ap);
 
-    e = (*env)->ThrowNew(env, cls, sz > 0 ? exc_buff : msg);
+    e = (*env)->ThrowNew(env, cls, sz > 0 ? exc_buff : fmt);
     spin_unlock();
+    va_end(ap);
 
     /* We should fail if exception cannot be throw */
     assert(e == 0);
