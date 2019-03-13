@@ -9,4 +9,5 @@ MAIN_CLASS:=net.trineo.xattr4j.XAttr4J
 
 javah:
 	$(JAVAH) $(MAIN_CLASS)
+	mv net_trineo_xattr4j_XAttr4J.h net/trineo/xattr4j/xattr4j_jni.h
 
