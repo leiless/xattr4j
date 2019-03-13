@@ -4,9 +4,10 @@
  * Extended attribute syscalls support
  *
  * see:
- *  www.ibm.com/developerworks/java/tutorials/j-jni/j-jni.html
- *  journals.ecs.soton.ac.uk/java/tutorial/native1.1/implementing/sync.html
- *  github.com/IsNull/xattrj
+ *  https://www.ibm.com/developerworks/java/tutorials/j-jni/j-jni.html
+ *  http://journals.ecs.soton.ac.uk/java/tutorial/native1.1/implementing/sync.html
+ *  https://github.com/IsNull/xattrj
+ *  https://docs.oracle.com/javase/7/docs/api/java/nio/file/attribute/UserDefinedFileAttributeView.html
  */
 
 package net.trineo.xattr4j;
