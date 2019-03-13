@@ -275,7 +275,8 @@ Java_net_trineo_xattr4j_XAttr4J__1removexattr(
         jclass cls,
         jbyteArray jbpath,
         jbyteArray jbname,
-        jint flags)
+        jint flags,
+        jboolean force)
 {
     int ok = 0;
     char *path;
@@ -286,7 +287,7 @@ Java_net_trineo_xattr4j_XAttr4J__1removexattr(
     name = get_cstr_bytes(env, jbname);
     if (name == NULL) goto get2;
 
-    ok = !removexattr(path, name, flags);
+    ok = !removexattr(path, name, flags) || (force && errno == ENOATTR);
 
     free(name);
 get2:

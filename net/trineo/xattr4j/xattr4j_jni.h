@@ -42,10 +42,10 @@ JNIEXPORT void JNICALL Java_net_trineo_xattr4j_XAttr4J__1setxattr
 /*
  * Class:     net_trineo_xattr4j_XAttr4J
  * Method:    _removexattr
- * Signature: ([B[BI)V
+ * Signature: ([B[BIZ)V
  */
 JNIEXPORT void JNICALL Java_net_trineo_xattr4j_XAttr4J__1removexattr
-  (JNIEnv *, jclass, jbyteArray, jbyteArray, jint);
+  (JNIEnv *, jclass, jbyteArray, jbyteArray, jint, jboolean);
 
 /*
  * Class:     net_trineo_xattr4j_XAttr4J

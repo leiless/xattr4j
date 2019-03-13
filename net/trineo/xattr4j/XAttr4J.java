@@ -113,15 +113,23 @@ public final class XAttr4J {
         setxattr(file.getAbsolutePath(), name, value, flags);
     }
 
-    public static void removexattr(String path, String name, int flags) throws IOException {
+    public static void removexattr(String path, String name, int flags, boolean force) throws IOException {
         byte[] path1 = stringToUTF8Bytes(path);
         byte[] name1 = stringToUTF8Bytes(name);
-        _removexattr(path1, name1, flags);
+        _removexattr(path1, name1, flags, force);
+    }
+
+    public static void removexattr(File file, String name, int flags, boolean force) throws IOException {
+        checkNotNull(file);
+        removexattr(file.getAbsolutePath(), name, flags, force);
+    }
+
+    public static void removexattr(String path, String name, int flags) throws IOException {
+        removexattr(path, name, flags, false);
     }
 
     public static void removexattr(File file, String name, int flags) throws IOException {
-        checkNotNull(file);
-        removexattr(file.getAbsolutePath(), name, flags);
+        removexattr(file, name, flags, false);
     }
 
     /**
@@ -170,7 +178,7 @@ public final class XAttr4J {
 
     private static native void _setxattr(byte[] path, byte[] name, byte[] value, int flags) throws IOException;
 
-    private static native void _removexattr(byte[] path, byte[] name, int flags) throws IOException;
+    private static native void _removexattr(byte[] path, byte[] name, int flags, boolean force) throws IOException;
 
     private static native String[] _listxattr(byte[] path, int flags) throws IOException;
 
