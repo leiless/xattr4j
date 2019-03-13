@@ -199,7 +199,6 @@ out_replay:
 
     len2 = getxattr(path, name, buff, len, 0, flags);
     if (len2 < 0) {
-        /* [NS-5301] potential TOCTTOU BUG */
         if (errno == ERANGE) {
             free(buff);
             LOG("TOCTTOU BUG in getxattr()  old size: %zd errno: %d", len, errno);
@@ -330,7 +329,6 @@ out_replay:
 
     sz2 = listxattr(path, namebuf, sz, flags);
     if (sz2 < 0) {
-        /* [NS-5301] potential TOCTTOU BUG */
         if (errno == ERANGE) {
             free(namebuf);
             LOG("TOCTTOU BUG in listxattr()  old size: %zd errno: %d", sz, errno);
