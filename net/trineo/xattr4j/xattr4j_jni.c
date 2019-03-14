@@ -34,35 +34,41 @@
 #endif
 
 #ifdef DEBUG
-#define LOG(fmt, ...) fprintf(stderr, "[xattr4j]: " fmt "\n", ##__VA_ARGS__)
+#define LOG(fmt, ...) fprintf(stderr, "xattr4j: " fmt "\n", ##__VA_ARGS__)
 #else
 #define LOG(fmt, ...) UNUSED(fmt, ##__VA_ARGS__)
 #endif
+
+#define assert_nonnull(p)       assert(p != NULL)
 
 /**
  * Get a NUL-terminated native C string from Java byte[]
  * @return      C char array    NULL if OOM(errno will set)
  *              Must be free via free(3)
  */
-static char *get_cstr_bytes(JNIEnv *env, jbyteArray jbarr)
+static inline char *get_cstr_bytes(JNIEnv *env, jbyteArray jbarr)
 {
     char *buff = NULL;
-    jsize sz;
     jbyte *arr;
+    jsize sz;
+
+    assert_nonnull(env);
+    assert_nonnull(jbarr);
 
     arr = (*env)->GetByteArrayElements(env, jbarr, NULL);
-    if (arr == NULL) goto get1;
+    if (arr == NULL) goto out_fail;
 
     sz = (*env)->GetArrayLength(env, jbarr);
     /* ENOMEM is the only possible errno from malloc(2) */
     buff = (char *) malloc(sz + 1);
     if (buff != NULL) {
-        memcpy(buff, arr, sz);
+        (void) memcpy(buff, arr, sz);
         buff[sz] = '\0';
     }
 
     (*env)->ReleaseByteArrayElements(env, jbarr, arr, JNI_ABORT);
-get1:
+
+out_fail:
     if (buff == NULL) errno = ENOMEM;
     return buff;
 }
