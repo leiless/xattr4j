@@ -417,16 +417,16 @@ Java_net_trineo_xattr4j_XAttr4J__1sizexattr(
     char *name;
 
     path = get_cstr_bytes(env, jbpath);
-    if (path == NULL) goto get1;
+    if (path == NULL) goto out_path;
     name = get_cstr_bytes(env, jbname);
-    if (name == NULL) goto get2;
+    if (name == NULL) goto out_name;
 
     sz = (jlong) getxattr(path, name, NULL, 0, 0, flags);
 
     free(name);
-get2:
+out_name:
     free(path);
-get1:
+out_path:
     if (sz < 0) throw_ioexc(env, "sizexattr(getxattr) failure");
     return sz;
 }
