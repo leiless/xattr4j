@@ -56,7 +56,11 @@ static inline char *get_cstr_bytes(JNIEnv *env, jbyteArray jbarr)
     assert_nonnull(jbarr);
 
     arr = (*env)->GetByteArrayElements(env, jbarr, NULL);
-    if (arr == NULL) goto out;
+    if (arr == NULL) {
+        /* Set a pseudo-errno for JNIEnv->GetByteArrayElements() */
+        errno = EIO;
+        goto out;
+    }
 
     sz = (*env)->GetArrayLength(env, jbarr);
     /* ENOMEM is the only possible errno from malloc(2) */
@@ -69,7 +73,6 @@ static inline char *get_cstr_bytes(JNIEnv *env, jbyteArray jbarr)
     (*env)->ReleaseByteArrayElements(env, jbarr, arr, JNI_ABORT);
 
 out:
-    if (buff == NULL) errno = ENOMEM;
     return buff;
 }
 
@@ -137,15 +140,12 @@ static char exc_buff[EXC_BUFSZ];
  * @cls     Exception class
  * @fmt     Exception message format
  * @...     Exception message parameters
- * XXX: errno must be set before call
  */
 static void throw_exc(JNIEnv *env, jclass cls, const char *fmt, ...)
 {
     int sz;
     jint e;
     va_list ap;
-
-    assert(errno != 0);
 
     va_start(ap, fmt);
     spin_lock();
@@ -164,7 +164,7 @@ static void throw_exc(JNIEnv *env, jclass cls, const char *fmt, ...)
 }
 
 #define throw_ioexc(env, fmt, ...) \
-    throw_exc(env, java_io_IOException, fmt, ##__VA_ARGS__)
+    throw_exc(env, java_io_IOException, fmt " line: %d", ##__VA_ARGS__, __LINE__)
 
 /*
  * XXX: When xattr data sized zero  we should return new byte[0] instead of null
@@ -186,14 +186,23 @@ Java_net_trineo_xattr4j_XAttr4J__1getxattr(
     ssize_t len2;
 
     path = get_cstr_bytes(env, jbpath);
-    if (path == NULL) goto out1;
+    if (path == NULL) {
+        throw_ioexc(env, "getxattr: get_cstr_bytes() path fail  errno: %d", errno);
+        goto out1;
+    }
 
     name = get_cstr_bytes(env, jbname);
-    if (name == NULL) goto out2;
+    if (name == NULL) {
+        throw_ioexc(env, "getxattr: get_cstr_bytes() name fail  errno: %d", errno);
+        goto out2;
+    }
 
 out_replay:
     len = getxattr(path, name, NULL, 0, 0, flags);
-    if (len < 0) goto out3;
+    if (len < 0) {
+        throw_ioexc(env, "getxattr(2) fail  errno: %d flags: %#x name: %s path: %s", errno, flags, name, path);
+        goto out3;
+    }
 
     /*
      * malloc(0) have implementation-defined behaviour
@@ -202,7 +211,10 @@ out_replay:
      */
     if (len != 0) {
         buff = (jbyte *) malloc(len);
-        if (buff == NULL) goto out3;
+        if (buff == NULL) {
+            throw_ioexc(env, "malloc(2) fail  errno: %d len: %zd name: %s path: %s", errno, len, name, path);
+            goto out3;
+        }
     } else {
         buff = NULL;
     }
@@ -211,10 +223,11 @@ out_replay:
     if (len2 < 0) {
         if (errno == ERANGE) {
             free(buff);
-            LOG("TOCTTOU BUG in getxattr()  old size: %zd errno: %d", len, errno);
+            LOG("TOCTTOU BUG in getxattr  old size: %zd errno: %d", len, errno);
             goto out_replay;
         }
 
+        throw_ioexc(env, "getxattr(2) fail  errno: %d flags: %#x len: %zd name: %s path: %s", errno, flags, len, name, path);
         goto out4;
     }
 
@@ -225,7 +238,7 @@ out_replay:
     if (out != NULL) {
         (*env)->SetByteArrayRegion(env, out, 0, len, buff);
     } else {
-        errno = ENOMEM;
+        throw_ioexc(env, "getxattr: JNIEnv->NewByteArray() fail  errno: %d len: %zd name: %s path: %s", errno, len, name, path);
     }
 
 out4:
@@ -235,7 +248,6 @@ out3:
 out2:
     free(path);
 out1:
-    if (out == NULL) throw_ioexc(env, "getxattr failure");
     return out;
 }
 
