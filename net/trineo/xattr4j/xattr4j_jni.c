@@ -163,13 +163,8 @@ static void throw_exc(JNIEnv *env, jclass cls, const char *fmt, ...)
     assert(e == 0);
 }
 
-static void throw_ioexc0(JNIEnv *env, const char *msg, int line)
-{
-    assert(java_io_IOException != NULL);
-    throw_exc(env, java_io_IOException, msg, line);
-}
-
-#define throw_ioexc(env, msg) throw_ioexc0(env, msg, __LINE__)
+#define throw_ioexc(env, fmt, ...) \
+    throw_exc(env, java_io_IOException, fmt, ##__VA_ARGS__)
 
 /*
  * XXX: When xattr data sized zero  we should return new byte[0] instead of null
