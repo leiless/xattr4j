@@ -290,16 +290,16 @@ Java_net_trineo_xattr4j_XAttr4J__1removexattr(
     char *name;
 
     path = get_cstr_bytes(env, jbpath);
-    if (path == NULL) goto get1;
+    if (path == NULL) goto out_path;
     name = get_cstr_bytes(env, jbname);
-    if (name == NULL) goto get2;
+    if (name == NULL) goto out_name;
 
     ok = !removexattr(path, name, flags) || (force && errno == ENOATTR);
 
     free(name);
-get2:
+out_name:
     free(path);
-get1:
+out_path:
     if (!ok) throw_ioexc(env, "removexattr failure");
 }
 
