@@ -90,6 +90,7 @@ Java_net_trineo_xattr4j_XAttr4J_init(
         jclass cls)
 {
     BUILD_BUG_ON(sizeof(char) == sizeof(jbyte));
+    BUILD_BUG_ON(sizeof(int) == sizeof(jint));
 
     java_lang_String = (*env)->FindClass(env, "java/lang/String");
     /* FindClass() will throw an exception if given class not found */
