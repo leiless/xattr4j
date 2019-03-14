@@ -186,14 +186,14 @@ Java_net_trineo_xattr4j_XAttr4J__1getxattr(
     ssize_t len2;
 
     path = get_cstr_bytes(env, jbpath);
-    if (path == NULL) goto get1;
+    if (path == NULL) goto out_path;
 
     name = get_cstr_bytes(env, jbname);
-    if (name == NULL) goto get2;
+    if (name == NULL) goto out_name;
 
 out_replay:
     len = getxattr(path, name, NULL, 0, 0, flags);
-    if (len < 0) goto get3;
+    if (len < 0) goto out_len;
 
     /*
      * malloc(0) have implementation-defined behaviour
@@ -202,7 +202,7 @@ out_replay:
      */
     if (len != 0) {
         buff = (jbyte *) malloc(len);
-        if (buff == NULL) goto get3;
+        if (buff == NULL) goto out_len;
     } else {
         buff = NULL;
     }
@@ -215,7 +215,7 @@ out_replay:
             goto out_replay;
         }
 
-        goto get4;
+        goto out_getxattr;
     }
 
     len = len2;     /* NOTE: 0 <= len2 <= len */
@@ -228,13 +228,13 @@ out_replay:
         errno = ENOMEM;
     }
 
-get4:
+out_getxattr:
     free(buff);
-get3:
+out_len:
     free(name);
-get2:
+out_name:
     free(path);
-get1:
+out_path:
     if (out == NULL) throw_ioexc(env, "getxattr failure");
     return out;
 }
