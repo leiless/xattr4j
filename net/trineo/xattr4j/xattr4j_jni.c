@@ -56,7 +56,7 @@ static inline char *get_cstr_bytes(JNIEnv *env, jbyteArray jbarr)
     assert_nonnull(jbarr);
 
     arr = (*env)->GetByteArrayElements(env, jbarr, NULL);
-    if (arr == NULL) goto out_fail;
+    if (arr == NULL) goto out;
 
     sz = (*env)->GetArrayLength(env, jbarr);
     /* ENOMEM is the only possible errno from malloc(2) */
@@ -68,7 +68,7 @@ static inline char *get_cstr_bytes(JNIEnv *env, jbyteArray jbarr)
 
     (*env)->ReleaseByteArrayElements(env, jbarr, arr, JNI_ABORT);
 
-out_fail:
+out:
     if (buff == NULL) errno = ENOMEM;
     return buff;
 }
@@ -186,14 +186,14 @@ Java_net_trineo_xattr4j_XAttr4J__1getxattr(
     ssize_t len2;
 
     path = get_cstr_bytes(env, jbpath);
-    if (path == NULL) goto out_path;
+    if (path == NULL) goto out1;
 
     name = get_cstr_bytes(env, jbname);
-    if (name == NULL) goto out_name;
+    if (name == NULL) goto out2;
 
 out_replay:
     len = getxattr(path, name, NULL, 0, 0, flags);
-    if (len < 0) goto out_len;
+    if (len < 0) goto out3;
 
     /*
      * malloc(0) have implementation-defined behaviour
@@ -202,7 +202,7 @@ out_replay:
      */
     if (len != 0) {
         buff = (jbyte *) malloc(len);
-        if (buff == NULL) goto out_len;
+        if (buff == NULL) goto out3;
     } else {
         buff = NULL;
     }
@@ -215,7 +215,7 @@ out_replay:
             goto out_replay;
         }
 
-        goto out_getxattr;
+        goto out4;
     }
 
     len = len2;     /* NOTE: 0 <= len2 <= len */
@@ -228,13 +228,13 @@ out_replay:
         errno = ENOMEM;
     }
 
-out_getxattr:
+out4:
     free(buff);
-out_len:
+out3:
     free(name);
-out_name:
+out2:
     free(path);
-out_path:
+out1:
     if (out == NULL) throw_ioexc(env, "getxattr failure");
     return out;
 }
@@ -255,24 +255,24 @@ Java_net_trineo_xattr4j_XAttr4J__1setxattr(
     jsize sz;
 
     path = get_cstr_bytes(env, jbpath);
-    if (path == NULL) goto out_path;
+    if (path == NULL) goto out1;
     name = get_cstr_bytes(env, jbname);
-    if (name == NULL) goto out_name;
+    if (name == NULL) goto out2;
     value = (*env)->GetByteArrayElements(env, jbvalue, NULL);
     if (value == NULL) {
         errno = EINVAL;
-        goto out_value;
+        goto out3;
     }
     sz = (*env)->GetArrayLength(env, jbvalue);
 
     ok = !setxattr(path, name, value, sz, 0, flags);
 
     (*env)->ReleaseByteArrayElements(env, jbvalue, value, JNI_ABORT);
-out_value:
+out3:
     free(name);
-out_name:
+out2:
     free(path);
-out_path:
+out1:
     if (!ok) throw_ioexc(env, "setxattr failure");
 }
 
@@ -290,16 +290,16 @@ Java_net_trineo_xattr4j_XAttr4J__1removexattr(
     char *name;
 
     path = get_cstr_bytes(env, jbpath);
-    if (path == NULL) goto out_path;
+    if (path == NULL) goto out1;
     name = get_cstr_bytes(env, jbname);
-    if (name == NULL) goto out_name;
+    if (name == NULL) goto out2;
 
     ok = !removexattr(path, name, flags) || (force && errno == ENOATTR);
 
     free(name);
-out_name:
+out2:
     free(path);
-out_path:
+out1:
     if (!ok) throw_ioexc(env, "removexattr failure");
 }
 
@@ -417,16 +417,16 @@ Java_net_trineo_xattr4j_XAttr4J__1sizexattr(
     char *name;
 
     path = get_cstr_bytes(env, jbpath);
-    if (path == NULL) goto out_path;
+    if (path == NULL) goto out1;
     name = get_cstr_bytes(env, jbname);
-    if (name == NULL) goto out_name;
+    if (name == NULL) goto out2;
 
     sz = (jlong) getxattr(path, name, NULL, 0, 0, flags);
 
     free(name);
-out_name:
+out2:
     free(path);
-out_path:
+out1:
     if (sz < 0) throw_ioexc(env, "sizexattr(getxattr) failure");
     return sz;
 }
