@@ -74,7 +74,6 @@ static jclass java_io_IOException;
  * Initialize non-direct JNI functionalities
  *
  * see: javap -s java.lang.String
- * exception will be throw if any error
  */
 JNIEXPORT void JNICALL
 Java_net_trineo_xattr4j_XAttr4J_init(
@@ -84,13 +83,20 @@ Java_net_trineo_xattr4j_XAttr4J_init(
     BUILD_BUG_ON(sizeof(char) == sizeof(jbyte));
 
     java_lang_String = (*env)->FindClass(env, "java/lang/String");
+    /* FindClass() will throw an exception if given class not found */
     if (java_lang_String == NULL) return;
     java_lang_String = (*env)->NewGlobalRef(env, java_lang_String);
     assert(java_lang_String != NULL);
 
     java_io_IOException = (*env)->FindClass(env, "java/io/IOException");
-    if (java_io_IOException == NULL) return;
+    if (java_io_IOException == NULL) {
+        (*env)->DeleteGlobalRef(env, java_lang_String);
+        return;
+    }
     java_io_IOException = (*env)->NewGlobalRef(env, java_io_IOException);
+    if (java_io_IOException == NULL) {
+        (*env)->DeleteGlobalRef(env, java_lang_String);
+    }
     assert(java_io_IOException != NULL);
 }
 
