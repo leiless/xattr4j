@@ -271,7 +271,7 @@ Java_net_trineo_xattr4j_XAttr4J__1setxattr(
     path = get_cstr_bytes(env, jbpath);
     if (path == NULL) {
         throw_ioexc(env, "get_cstr_bytes() path fail  errno: %d", errno);
-        goto out1;
+        return;
     }
 
     name = get_cstr_bytes(env, jbname);
