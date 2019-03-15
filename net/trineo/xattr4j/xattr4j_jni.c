@@ -189,13 +189,13 @@ Java_net_trineo_xattr4j_XAttr4J__1getxattr(
 
     path = get_cstr_bytes(env, jbpath);
     if (path == NULL) {
-        throw_ioexc(env, "getxattr: get_cstr_bytes() path fail  errno: %d", errno);
+        throw_ioexc(env, "get_cstr_bytes() path fail  errno: %d", errno);
         goto out1;
     }
 
     name = get_cstr_bytes(env, jbname);
     if (name == NULL) {
-        throw_ioexc(env, "getxattr: get_cstr_bytes() name fail  errno: %d", errno);
+        throw_ioexc(env, "get_cstr_bytes() name fail  errno: %d", errno);
         goto out2;
     }
 
@@ -225,7 +225,7 @@ out_replay:
     if (len2 < 0) {
         if (errno == ERANGE) {
             free(buff);
-            LOG("TOCTTOU BUG in getxattr  old size: %zd errno: %d", len, errno);
+            LOG("TOCTTOU BUG in getxattr(2)  errno: %d len: %zd name: %s path: %s", errno, len, name, path);
             goto out_replay;
         }
 
@@ -240,7 +240,7 @@ out_replay:
     if (out != NULL) {
         (*env)->SetByteArrayRegion(env, out, 0, len, buff);
     } else {
-        throw_ioexc(env, "getxattr: JNIEnv->NewByteArray() fail  errno: %d len: %zd name: %s path: %s", errno, len, name, path);
+        throw_ioexc(env, "JNIEnv->NewByteArray() fail  errno: %d len: %zd name: %s path: %s", errno, len, name, path);
     }
 
 out4:
@@ -282,7 +282,7 @@ Java_net_trineo_xattr4j_XAttr4J__1setxattr(
 
     value = (*env)->GetByteArrayElements(env, jbvalue, NULL);
     if (value == NULL) {
-        throw_ioexc(env, "JNIEnv->GetByteArrayElements() value fail  name: %s path: %s", name, path);
+        throw_ioexc(env, "JNIEnv->GetByteArrayElements() `value' fail  name: %s path: %s", name, path);
         goto out2;
     }
 
@@ -290,7 +290,7 @@ Java_net_trineo_xattr4j_XAttr4J__1setxattr(
 
     ok = !setxattr(path, name, value, (size_t) sz, 0, flags);
     if (!ok) {
-        throw_ioexc(env, "setxattr(2) fail  errno: %d vlen: %d name: %s path: %s", errno, sz, name, path);
+        throw_ioexc(env, "setxattr(2) fail  errno: %d flags: %#x vlen: %d name: %s path: %s", errno, flags, sz, name, path);
     }
 
     (*env)->ReleaseByteArrayElements(env, jbvalue, value, JNI_ABORT);
