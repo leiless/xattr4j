@@ -1,7 +1,7 @@
 /*
  * Created: 190313
  *
- * C code implementation of extended attribute syscalls
+ * JNI wrappers of extended attribute syscalls
  *
  * see:
  *  xdprof.sourceforge.net/doxygen/jni_8h-source.html
@@ -13,12 +13,13 @@
 #include <jni.h>
 #include <stdio.h>
 #include <assert.h>         /* -DNDEBUG to disable runtime assertion */
-#include <errno.h>          /* for DEBUG */
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 #include <unistd.h>
 #include <sys/xattr.h>
+
 #include "xattr4j_jni.h"
 
 /* Used to indicate unused function parameters */
