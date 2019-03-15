@@ -149,6 +149,7 @@ Java_net_trineo_xattr4j_XAttr4J_init(
     BUILD_BUG_ON(sizeof(char) == sizeof(jbyte));
     BUILD_BUG_ON(sizeof(int) == sizeof(jint));
     BUILD_BUG_ON(sizeof(int) == sizeof(jsize));
+    BUILD_BUG_ON(sizeof(ssize_t) <= sizeof(jlong));
 
     java_lang_String = (*env)->FindClass(env, "java/lang/String");
     /* FindClass() will throw an exception if given class not found */
@@ -433,6 +434,9 @@ out1:
  * @throws      IOException if I/O error or denoted xattr name do not exist
  *
  * This fast wrapper can be used to probe existence of a specific xattr
+ *
+ * ASK: use a jboolean to differentiate IOExceptions between
+ *      denoted xattr do not exist and other IO errors
  */
 JNIEXPORT jlong JNICALL
 Java_net_trineo_xattr4j_XAttr4J__1sizexattr(
@@ -447,17 +451,26 @@ Java_net_trineo_xattr4j_XAttr4J__1sizexattr(
     char *name;
 
     path = get_cstr_bytes(env, jbpath);
-    if (path == NULL) goto out1;
+    if (path == NULL) {
+        throw_ioexc(env, "get_cstr_bytes() path fail  errno: %d", errno);
+        goto out1;
+    }
+
     name = get_cstr_bytes(env, jbname);
-    if (name == NULL) goto out2;
+    if (name == NULL) {
+        throw_ioexc(env, "get_cstr_bytes() name fail  errno: %d", errno);
+        goto out2;
+    }
 
     sz = (jlong) getxattr(path, name, NULL, 0, 0, flags);
+    if (sz < 0) {
+        throw_ioexc(env, "getxattr(2) fail  errno: %d flags: %#x name: %s path: %s", errno, flags, name, path);
+    }
 
     free(name);
 out2:
     free(path);
 out1:
-    if (sz < 0) throw_ioexc(env, "sizexattr(getxattr) failure");
     return sz;
 }
 
