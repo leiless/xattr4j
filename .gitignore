@@ -2,4 +2,6 @@
 *.iml
 .DS_Store
 *.out
+*.dylib
+*.class
 
