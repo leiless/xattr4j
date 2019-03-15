@@ -42,6 +42,63 @@
 #define assert_nonnull(p)       assert(p != NULL)
 
 /**
+ * Strong version of atomic compare-and-swap
+ * @p           pointer to cas with
+ * @o           old value
+ * @n           new value
+ * @return      true if success  false o.w.
+ * see: http://donghao.org/2015/01/30/128bit-atomic-operation-in-arm64
+ *
+ * NOTE: GCC-compatible available only
+ */
+#define atomic_cas(p, o, n) ({  \
+    __typeof(*(p)) t = (o);     \
+    __atomic_compare_exchange_n(p, &t, n, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST); \
+})
+
+static int __k = 0;
+#define spin_lock()     while (!atomic_cas(&__k, 0, 1)) continue
+#define spin_unlock()   do {            \
+    int ok = atomic_cas(&__k, 1, 0);    \
+    assert(ok);                         \
+} while (0)
+
+#define EXC_BUFSZ   8192
+static char exc_buff[EXC_BUFSZ];
+
+/**
+ * Throw an exception
+ * @env     JNI environment
+ * @cls     Exception class
+ * @fmt     Exception message format
+ * @...     Exception message parameters
+ */
+static void throw_exc(JNIEnv *env, jclass cls, const char *fmt, ...)
+{
+    int sz;
+    jint e;
+    va_list ap;
+
+    va_start(ap, fmt);
+    spin_lock();
+    /*
+     * We use static buffer simply :. the exception itself may caused by OOM
+     *  in such case further malloc(3) will fail again
+     */
+    sz = vsnprintf(exc_buff, EXC_BUFSZ, fmt, ap);
+
+    e = (*env)->ThrowNew(env, cls, sz > 0 ? exc_buff : fmt);
+    spin_unlock();
+    va_end(ap);
+
+    /* We should fail if exception cannot be throw */
+    assert(e == 0);
+}
+
+#define throw_ioexc(env, fmt, ...) \
+    throw_exc(env, java_io_IOException, fmt " line: %d", ##__VA_ARGS__, __LINE__)
+
+/**
  * Get a NUL-terminated native C string from Java byte[]
  * @return      C char array    NULL if OOM(errno will set)
  *              Must be free via free(3)
@@ -110,63 +167,6 @@ Java_net_trineo_xattr4j_XAttr4J_init(
     }
     assert(java_io_IOException != NULL);
 }
-
-/**
- * Strong version of atomic compare-and-swap
- * @p           pointer to cas with
- * @o           old value
- * @n           new value
- * @return      true if success  false o.w.
- * see: http://donghao.org/2015/01/30/128bit-atomic-operation-in-arm64
- *
- * NOTE: GCC-compatible available only
- */
-#define atomic_cas(p, o, n) ({  \
-    __typeof(*(p)) t = (o);     \
-    __atomic_compare_exchange_n(p, &t, n, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST); \
-})
-
-static int __k = 0;
-#define spin_lock()     while (!atomic_cas(&__k, 0, 1)) continue
-#define spin_unlock()   do {            \
-    int ok = atomic_cas(&__k, 1, 0);    \
-    assert(ok);                         \
-} while (0)
-
-#define EXC_BUFSZ   8192
-static char exc_buff[EXC_BUFSZ];
-
-/**
- * Throw an exception
- * @env     JNI environment
- * @cls     Exception class
- * @fmt     Exception message format
- * @...     Exception message parameters
- */
-static void throw_exc(JNIEnv *env, jclass cls, const char *fmt, ...)
-{
-    int sz;
-    jint e;
-    va_list ap;
-
-    va_start(ap, fmt);
-    spin_lock();
-    /*
-     * We use static buffer simply :. the exception itself may caused by OOM
-     *  in such case further malloc(3) will fail again
-     */
-    sz = vsnprintf(exc_buff, EXC_BUFSZ, fmt, ap);
-
-    e = (*env)->ThrowNew(env, cls, sz > 0 ? exc_buff : fmt);
-    spin_unlock();
-    va_end(ap);
-
-    /* We should fail if exception cannot be throw */
-    assert(e == 0);
-}
-
-#define throw_ioexc(env, fmt, ...) \
-    throw_exc(env, java_io_IOException, fmt " line: %d", ##__VA_ARGS__, __LINE__)
 
 /*
  * XXX: When xattr data sized zero  we should return new byte[0] instead of null
