@@ -8,6 +8,7 @@
  *  xdprof.sourceforge.net/doxygen/jni__md_8h-source.html
  *  docs.oracle.com/javase/8/docs/technotes/guides/jni/spec/functions.html
  *  ptolemy.berkeley.edu/~johnr/tutorials/assertions.html
+ *  stackoverflow.com/questions/12207941/proper-way-to-clean-up-new-object-array-in-jni
  */
 
 #include <jni.h>
@@ -342,7 +343,7 @@ Java_net_trineo_xattr4j_XAttr4J__1listxattr(
         jbyteArray jbpath,
         jint flags)
 {
-    jobjectArray arr;
+    jobjectArray arr = NULL;
     char *path;
     ssize_t sz;
     ssize_t sz2;
@@ -351,30 +352,36 @@ Java_net_trineo_xattr4j_XAttr4J__1listxattr(
     size_t cnt, i;
     jstring *jnamebuf;
 
-    assert(java_lang_String != NULL);
-
-    arr = NULL;
-
     path = get_cstr_bytes(env, jbpath);
-    if (path == NULL) goto out1;
+    if (path == NULL) {
+        throw_ioexc(env, "get_cstr_bytes() path fail  errno: %d", errno);
+        goto out1;
+    }
 
 out_replay:
     sz = listxattr(path, NULL, 0, flags);
-    if (sz < 0) goto out2;
+    if (sz < 0) {
+        throw_ioexc(env, "listxattr(2) fail  errno: %d flags: %#x path: %s", errno, flags, path);
+        goto out2;
+    }
+
     if (sz == 0) {
         arr = (*env)->NewObjectArray(env, 0, java_lang_String, NULL);
-        if (arr == NULL) errno = ENOMEM;
+        if (arr == NULL) throw_ioexc(env, "JNIEnv->NewObjectArray() fail  sz: %zd", sz);
         goto out2;
     }
 
     namebuf = (char *) malloc(sz);
-    if (namebuf == NULL) goto out2;
+    if (namebuf == NULL) {
+        throw_ioexc(env, "malloc(3) fail  errno: %d flags: %#x sz: %zd path: %s", errno, flags, sz, path);
+        goto out2;
+    }
 
     sz2 = listxattr(path, namebuf, sz, flags);
     if (sz2 < 0) {
         if (errno == ERANGE) {
             free(namebuf);
-            LOG("TOCTTOU BUG in listxattr()  old size: %zd errno: %d", sz, errno);
+            LOG("TOCTTOU BUG in listxattr(2)  errno: %d flags: %#x sz: %zd path: %s", errno, flags, sz, path);
             goto out_replay;
         }
 
@@ -384,7 +391,7 @@ out_replay:
     sz = sz2;       /* NOTE: 0 <= sz2 <= sz */
     if (sz == 0) {
         arr = (*env)->NewObjectArray(env, 0, java_lang_String, NULL);
-        if (arr == NULL) errno = ENOMEM;
+        if (arr == NULL) throw_ioexc(env, "JNIEnv->NewObjectArray() fail  sz: %zd", sz);
         goto out3;
     }
 
@@ -396,13 +403,18 @@ out_replay:
     }
 
     jnamebuf = (jstring *) malloc(sizeof(jstring *) * cnt);
-    if (jnamebuf == NULL) goto out3;
+    if (jnamebuf == NULL) {
+        throw_ioexc(env, "malloc(3) fail  mem: %zu errno: %d flags: %#x sz: %zd path: %s",
+                            sizeof(jstring *) * cnt, errno, flags, sz, path);
+        goto out3;
+    }
 
     cursor = namebuf;
     for (i = 0; i < cnt; i++) {
         jnamebuf[i] = (*env)->NewStringUTF(env, cursor);
         if (jnamebuf[i] == NULL) {
-            errno = ENOMEM;
+            throw_ioexc(env, "JNIEnv->NewStringUTF() fail  i: %zu cursor: %s flags: %#x sz: %zd path: %s",
+                                i, cursor, flags, sz, path);
             goto out4;
         }
         cursor += strlen(cursor) + 1;
@@ -410,7 +422,8 @@ out_replay:
 
     arr = (*env)->NewObjectArray(env, cnt, java_lang_String, NULL);
     if (arr == NULL) {
-        errno = ENOMEM;
+        throw_ioexc(env, "JNIEnv->NewObjectArray() fail  cnt: %zu flags: %#x sz: %zd path: %s",
+                            cnt, flags, sz, path);
         goto out4;
     }
     for (i = 0; i < cnt; i++) {
@@ -425,7 +438,6 @@ out3:
 out2:
     free(path);
 out1:
-    if (arr == NULL) throw_ioexc(env, "listxattr failure");
     return arr;
 }
 
