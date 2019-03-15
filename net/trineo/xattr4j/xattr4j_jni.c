@@ -413,6 +413,7 @@ out_replay:
     for (i = 0; i < cnt; i++) {
         jnamebuf[i] = (*env)->NewStringUTF(env, cursor);
         if (jnamebuf[i] == NULL) {
+            while (i--) (*env)->DeleteLocalRef(env, jnamebuf[i]);
             throw_ioexc(env, "JNIEnv->NewStringUTF() fail  i: %zu cursor: %s flags: %#x sz: %zd path: %s",
                                 i, cursor, flags, sz, path);
             goto out4;
