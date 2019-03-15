@@ -309,22 +309,28 @@ Java_net_trineo_xattr4j_XAttr4J__1removexattr(
         jint flags,
         jboolean force)
 {
-    int ok = 0;
     char *path;
     char *name;
 
     path = get_cstr_bytes(env, jbpath);
-    if (path == NULL) goto out1;
-    name = get_cstr_bytes(env, jbname);
-    if (name == NULL) goto out2;
+    if (path == NULL) {
+        throw_ioexc(env, "get_cstr_bytes() path fail  errno: %d", errno);
+        return;
+    }
 
-    ok = !removexattr(path, name, flags) || (force && errno == ENOATTR);
+    name = get_cstr_bytes(env, jbname);
+    if (name == NULL) {
+        throw_ioexc(env, "get_cstr_bytes() name fail  errno: %d", errno);
+        goto out;
+    }
+
+    if (removexattr(path, name, flags) && (!force || errno != ENOATTR)) {
+        throw_ioexc(env, "removexattr(2) fail  errno: %d flags: %#x name: %s path: %s", errno, flags, name, path);
+    }
 
     free(name);
-out2:
+out:
     free(path);
-out1:
-    if (!ok) throw_ioexc(env, "removexattr failure");
 }
 
 JNIEXPORT jobjectArray JNICALL
