@@ -91,6 +91,7 @@ Java_net_trineo_xattr4j_XAttr4J_init(
 {
     BUILD_BUG_ON(sizeof(char) == sizeof(jbyte));
     BUILD_BUG_ON(sizeof(int) == sizeof(jint));
+    BUILD_BUG_ON(sizeof(int) == sizeof(jsize));
 
     java_lang_String = (*env)->FindClass(env, "java/lang/String");
     /* FindClass() will throw an exception if given class not found */
@@ -261,32 +262,42 @@ Java_net_trineo_xattr4j_XAttr4J__1setxattr(
         jbyteArray jbvalue,
         jint flags)
 {
-    int ok = 0;
+    int ok;
     char *path;
     char *name;
     jbyte *value;
     jsize sz;
 
     path = get_cstr_bytes(env, jbpath);
-    if (path == NULL) goto out1;
+    if (path == NULL) {
+        throw_ioexc(env, "get_cstr_bytes() path fail  errno: %d", errno);
+        goto out1;
+    }
+
     name = get_cstr_bytes(env, jbname);
-    if (name == NULL) goto out2;
+    if (name == NULL) {
+        throw_ioexc(env, "get_cstr_bytes() name fail  errno: %d", errno);
+        goto out1;
+    }
+
     value = (*env)->GetByteArrayElements(env, jbvalue, NULL);
     if (value == NULL) {
-        errno = EINVAL;
-        goto out3;
+        throw_ioexc(env, "JNIEnv->GetByteArrayElements() value fail  name: %s path: %s", name, path);
+        goto out2;
     }
+
     sz = (*env)->GetArrayLength(env, jbvalue);
 
-    ok = !setxattr(path, name, value, sz, 0, flags);
+    ok = !setxattr(path, name, value, (size_t) sz, 0, flags);
+    if (!ok) {
+        throw_ioexc(env, "setxattr(2) fail  errno: %d vlen: %d name: %s path: %s", errno, sz, name, path);
+    }
 
     (*env)->ReleaseByteArrayElements(env, jbvalue, value, JNI_ABORT);
-out3:
-    free(name);
 out2:
-    free(path);
+    free(name);
 out1:
-    if (!ok) throw_ioexc(env, "setxattr failure");
+    free(path);
 }
 
 JNIEXPORT void JNICALL
