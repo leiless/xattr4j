@@ -429,6 +429,7 @@ out_replay:
     }
     for (i = 0; i < cnt; i++) {
         (*env)->SetObjectArrayElement(env, arr, i, jnamebuf[i]);
+        /* https://stackoverflow.com/q/4369974/10725426 */
         (*env)->DeleteLocalRef(env, jnamebuf[i]);
     }
 
