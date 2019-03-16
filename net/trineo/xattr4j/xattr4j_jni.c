@@ -173,7 +173,7 @@ Java_net_trineo_xattr4j_XAttr4J_init(
     assert_nonnull(java_io_IOException);
 }
 
-/*
+/**
  * XXX: When xattr data sized zero  we should return new byte[0] instead of null
  * @return      A valid(nonnull) byte[] array
  * @throws      IOException if internal failure
@@ -337,6 +337,14 @@ out:
     free(path);
 }
 
+/**
+ * List extended attribute names for a given path
+ * @jbpath      UTF-8 encoded path
+ * @flags       Options passed to listxattr(2)
+ * @return      An java.lang.String array contains all extended attribute names
+ *              An empty array if given path have no xattr at all
+ * @throws      IOException if operation cannot complete or failed
+ */
 JNIEXPORT jobjectArray JNICALL
 Java_net_trineo_xattr4j_XAttr4J__1listxattr(
         JNIEnv *env,
@@ -386,6 +394,7 @@ out_replay:
             goto out_replay;
         }
 
+        throw_ioexc(env, "listxattr(2) fail  errno: %d flags: %#x sz: %zd path: %s", errno, flags, sz, path);
         goto out3;
     }
 
@@ -405,7 +414,7 @@ out_replay:
 
     jnamebuf = (jstring *) malloc(sizeof(jstring *) * cnt);
     if (jnamebuf == NULL) {
-        throw_ioexc(env, "malloc(3) fail  mem: %zu errno: %d flags: %#x sz: %zd path: %s",
+        throw_ioexc(env, "malloc(3) fail size: %zu  errno: %d flags: %#x sz: %zd path: %s",
                             sizeof(jstring *) * cnt, errno, flags, sz, path);
         goto out3;
     }
@@ -414,9 +423,9 @@ out_replay:
     for (i = 0; i < cnt; i++) {
         jnamebuf[i] = (*env)->NewStringUTF(env, cursor);
         if (jnamebuf[i] == NULL) {
-            while (i--) (*env)->DeleteLocalRef(env, jnamebuf[i]);
             throw_ioexc(env, "JNIEnv->NewStringUTF() fail  i: %zu cursor: %s flags: %#x sz: %zd path: %s",
                                 i, cursor, flags, sz, path);
+            while (i--) (*env)->DeleteLocalRef(env, jnamebuf[i]);
             goto out4;
         }
         cursor += strlen(cursor) + 1;
@@ -428,6 +437,7 @@ out_replay:
                             cnt, flags, sz, path);
         goto out4;
     }
+
     for (i = 0; i < cnt; i++) {
         (*env)->SetObjectArrayElement(env, arr, i, jnamebuf[i]);
         /* https://stackoverflow.com/q/4369974/10725426 */
