@@ -1,7 +1,9 @@
+*.swp
 .idea/
 *.iml
 .DS_Store
 *.out
 *.dylib
+*.dSYM/
 *.class
 
