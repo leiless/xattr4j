@@ -53,9 +53,10 @@
  *
  * NOTE: GCC-compatible available only
  */
-#define atomic_cas(p, o, n) ({  \
-    __typeof(*(p)) t = (o);     \
-    __atomic_compare_exchange_n(p, &t, n, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST); \
+#define atomic_cas(p, o, n) ({      \
+    __typeof(*(p)) t = (o);         \
+    __atomic_compare_exchange_n(    \
+        p, &t, n, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST); \
 })
 
 static int __k = 0;
@@ -122,7 +123,7 @@ static inline char *get_cstr_bytes(JNIEnv *env, jbyteArray jbarr)
     }
 
     sz = (*env)->GetArrayLength(env, jbarr);
-    /* ENOMEM is the only possible errno from malloc(2) */
+    /* ENOMEM is the only possible errno from malloc(3) */
     buff = (char *) malloc(sz + 1);
     if (buff != NULL) {
         (void) memcpy(buff, arr, sz);
@@ -154,10 +155,10 @@ Java_net_trineo_xattr4j_XAttr4J_init(
     BUILD_BUG_ON(sizeof(ssize_t) <= sizeof(jlong));
 
     java_lang_String = (*env)->FindClass(env, "java/lang/String");
-    /* FindClass() will throw an exception if given class not found */
+    /* JNIEnv->FindClass() will throw an exception if given class not found */
     if (java_lang_String == NULL) return;
     java_lang_String = (*env)->NewGlobalRef(env, java_lang_String);
-    assert(java_lang_String != NULL);
+    assert_nonnull(java_lang_String);
 
     java_io_IOException = (*env)->FindClass(env, "java/io/IOException");
     if (java_io_IOException == NULL) {
@@ -166,13 +167,15 @@ Java_net_trineo_xattr4j_XAttr4J_init(
     }
     java_io_IOException = (*env)->NewGlobalRef(env, java_io_IOException);
     if (java_io_IOException == NULL) {
+        /* Properly drop global reference of java.lang.String before assert */
         (*env)->DeleteGlobalRef(env, java_lang_String);
     }
-    assert(java_io_IOException != NULL);
+    assert_nonnull(java_io_IOException);
 }
 
 /*
  * XXX: When xattr data sized zero  we should return new byte[0] instead of null
+ * @return      A valid(nonnull) byte[] array
  * @throws      IOException if internal failure
  */
 JNIEXPORT jbyteArray JNICALL
@@ -210,7 +213,7 @@ out_replay:
     }
 
     /*
-     * malloc(0) have implementation-defined behaviour
+     * malloc with zero-size have implementation-defined behaviour
      * BSD malloc(3) won't fail in such case
      * see: Open Group Base Specifications - malloc(3)
      */
