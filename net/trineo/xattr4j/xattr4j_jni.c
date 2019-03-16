@@ -268,7 +268,6 @@ Java_net_trineo_xattr4j_XAttr4J__1setxattr(
         jbyteArray jbvalue,
         jint flags)
 {
-    int ok;
     char *path;
     char *name;
     jbyte *value;
@@ -294,9 +293,8 @@ Java_net_trineo_xattr4j_XAttr4J__1setxattr(
 
     sz = (*env)->GetArrayLength(env, jbvalue);
 
-    ok = !setxattr(path, name, value, (size_t) sz, 0, flags);
-    if (!ok) {
-        throw_ioexc(env, "setxattr(2) fail  errno: %d flags: %#x vlen: %d name: %s path: %s", errno, flags, sz, name, path);
+    if (setxattr(path, name, value, (size_t) sz, 0, flags) < 0) {
+        throw_ioexc(env, "setxattr(2) fail  errno: %d flags: %#x sz: %d name: %s path: %s", errno, flags, sz, name, path);
     }
 
     (*env)->ReleaseByteArrayElements(env, jbvalue, value, JNI_ABORT);
@@ -330,8 +328,8 @@ Java_net_trineo_xattr4j_XAttr4J__1removexattr(
         goto out;
     }
 
-    if (removexattr(path, name, flags) && (!force || errno != ENOATTR)) {
-        throw_ioexc(env, "removexattr(2) fail  errno: %d flags: %#x name: %s path: %s", errno, flags, name, path);
+    if (removexattr(path, name, flags) < 0 && (!force || errno != ENOATTR)) {
+        throw_ioexc(env, "removexattr(2) fail  force: %d errno: %d flags: %#x name: %s path: %s", force, errno, flags, name, path);
     }
 
     free(name);
