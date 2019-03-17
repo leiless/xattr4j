@@ -313,6 +313,7 @@ Java_net_trineo_xattr4j_XAttr4J__1removexattr(
         jint options,
         jboolean force)
 {
+    int ok;
     char *path;
     char *name;
 
@@ -328,7 +329,8 @@ Java_net_trineo_xattr4j_XAttr4J__1removexattr(
         goto out;
     }
 
-    if (removexattr(path, name, options) < 0 && (!force || errno != ENOATTR)) {
+    ok = !removexattr(path, name, options);
+    if (!ok && (!force || (errno != ENOENT && errno != ENOATTR))) {
         throw_ioexc(env, "removexattr(2) fail  force: %d errno: %d options: %#x name: %s path: %s", force, errno, options, name, path);
     }
 
