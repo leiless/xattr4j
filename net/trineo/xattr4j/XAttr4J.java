@@ -215,6 +215,30 @@ public final class XAttr4J {
         return sizexattr(file.getAbsolutePath(), name, options);
     }
 
+    /**
+     * Check if an extended attribute exists
+     *
+     * @param path          File path
+     * @param name          Extended attribute name
+     * @param options       getxattr(2) options
+     * @return              true if given extended attribute exists  false o.w.
+     * @throws IOException  If getxattr(2) operation failed
+     *                      If given path doesn't exist  IOException will throw
+     */
+    public static boolean existxattr(String path, String name, int options) throws IOException {
+        byte[] path1 = stringToUTF8Bytes(path);
+        byte[] name1 = stringToUTF8Bytes(name);
+        return _existxattr(path1, name1, options);
+    }
+
+    /**
+     * @see XAttr4J#existxattr(String, String, int)
+     */
+    public static boolean existxattr(File file, String name, int options) throws IOException {
+        checkNotNull(file);
+        return existxattr(file.getAbsolutePath(), name, options);
+    }
+
     /* Should call in static block and call once */
     private static native void init();
 
@@ -228,4 +252,6 @@ public final class XAttr4J {
 
     /* Fast version of getxattr(2) */
     private static native long _sizexattr(byte[] path, byte[] name, int options) throws IOException;
+
+    private static native boolean _existxattr(byte[] path, byte[] name, int options) throws IOException;
 }

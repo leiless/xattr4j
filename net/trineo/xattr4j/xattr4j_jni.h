@@ -63,6 +63,14 @@ JNIEXPORT jobjectArray JNICALL Java_net_trineo_xattr4j_XAttr4J__1listxattr
 JNIEXPORT jlong JNICALL Java_net_trineo_xattr4j_XAttr4J__1sizexattr
   (JNIEnv *, jclass, jbyteArray, jbyteArray, jint);
 
+/*
+ * Class:     net_trineo_xattr4j_XAttr4J
+ * Method:    _existxattr
+ * Signature: ([B[BI)Z
+ */
+JNIEXPORT jboolean JNICALL Java_net_trineo_xattr4j_XAttr4J__1existxattr
+  (JNIEnv *, jclass, jbyteArray, jbyteArray, jint);
+
 #ifdef __cplusplus
 }
 #endif

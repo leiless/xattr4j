@@ -502,3 +502,39 @@ out1:
     return sz;
 }
 
+JNIEXPORT jboolean JNICALL
+Java_net_trineo_xattr4j_XAttr4J__1existxattr(
+        JNIEnv *env, jclass cls,
+        jbyteArray jbpath,
+        jbyteArray jbname,
+        jint options)
+{
+    jboolean exists = JNI_FALSE;
+    char *path;
+    char *name;
+
+    path = get_cstr_bytes(env, jbpath);
+    if (path == NULL) {
+        throw_ioexc(env, "get_cstr_bytes() path fail  errno: %d", errno);
+        goto out1;
+    }
+
+    name = get_cstr_bytes(env, jbname);
+    if (name == NULL) {
+        throw_ioexc(env, "get_cstr_bytes() name fail  errno: %d", errno);
+        goto out2;
+    }
+
+    exists = getxattr(path, name, NULL, 0, 0, options) >= 0;
+    if (!exists && errno != ENOATTR) {
+        /* Throw if given `path' doesn't exist(ENOENT) */
+        throw_ioexc(env, "getxattr(2) fail  errno: %d options: %#x name: %s path: %s", errno, options, name, path);
+    }
+
+    free(name);
+out2:
+    free(path);
+out1:
+    return exists;
+}
+
