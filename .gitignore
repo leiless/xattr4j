@@ -7,4 +7,5 @@
 *.dSYM/
 *.class
 *.jar
+manifest.txt
 
