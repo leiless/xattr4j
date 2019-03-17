@@ -34,8 +34,8 @@ javac:
 	mv net_trineo_xattr4j_XAttr4J.h $(PKG_DIR)/xattr4j_jni.h
 	$(JAVA_HOME)/bin/javac -Xlint $(PKG_DIR)/XAttr4J.java $(PKG_DIR)/LibLoader.java
 
-jni-core: I1 += $(JAVA_HOME)/include
-jni-core: I2 += $(JAVA_HOME)/include/darwin
+jni-core: I1 = $(JAVA_HOME)/include
+jni-core: I2 = $(JAVA_HOME)/include/darwin
 jni-core:
 	$(CC) $(CPPFLAGS) $(CFLAGS) -I$(I1) -I$(I2) -o $(LIBNAME) -lc $(SOURCE)
 	otool -l $(LIBNAME) | grep uuid
@@ -61,7 +61,9 @@ jar: javac jni-debug jar-core
 
 jar-release: javac jni-release jar-core
 
+release: jar-release
+
 clean:
-	rm -f manifest.txt $(PKG_DIR)/*.class $(LIBNAME)
+	rm -f manifest.txt $(PKG_DIR)/*.class $(LIBNAME) *.jar
 	rm -rf $(LIBNAME).dSYM
 
