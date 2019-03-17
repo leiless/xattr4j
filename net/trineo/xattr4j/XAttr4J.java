@@ -97,6 +97,7 @@ public final class XAttr4J {
      * @param name          Extended attribute name
      * @param value         Extended attribute value to set
      * @param options       setxattr(2) options
+     * @throws IOException  If setxattr(2) operation failed
      *
      * XXX: Assume value encoded in UTF-8(System.getProperty("file.encoding"))
      */
@@ -107,11 +108,17 @@ public final class XAttr4J {
         _setxattr(path1, name1, value, options);
     }
 
+    /**
+     * @see XAttr4J#setxattr(String, String, byte[], int)
+     */
     public static void setxattr(File file, String name, byte[] value, int options) throws IOException {
         checkNotNull(file);
         setxattr(file.getAbsolutePath(), name, value, options);
     }
 
+    /**
+     * @see XAttr4J#setxattr(String, String, byte[], int)
+     */
     public static void setxattr(String path, String name, String value, int options) throws IOException {
         checkNotNull(path);
         checkNotNull(name);
@@ -119,26 +126,47 @@ public final class XAttr4J {
         setxattr(path, name, value1, options);
     }
 
+    /**
+     * @see XAttr4J#setxattr(String, String, byte[], int)
+     */
     public static void setxattr(File file, String name, String value, int options) throws IOException {
         checkNotNull(file);
         setxattr(file.getAbsolutePath(), name, value, options);
     }
 
+    /**
+     * Remove an extended attribute value
+     *
+     * @param path          File path
+     * @param name          Extended attribute name
+     * @param options       removexattr(2) options
+     * @param force         Flag to indicate don't throw IOException when path don't exist or name don't exist
+     * @throws IOException  If removexattr(2) operation failed
+     */
     public static void removexattr(String path, String name, int options, boolean force) throws IOException {
         byte[] path1 = stringToUTF8Bytes(path);
         byte[] name1 = stringToUTF8Bytes(name);
         _removexattr(path1, name1, options, force);
     }
 
+    /**
+     * @see XAttr4J#removexattr(String, String, int, boolean)
+     */
     public static void removexattr(File file, String name, int options, boolean force) throws IOException {
         checkNotNull(file);
         removexattr(file.getAbsolutePath(), name, options, force);
     }
 
+    /**
+     * @see XAttr4J#removexattr(String, String, int, boolean)
+     */
     public static void removexattr(String path, String name, int options) throws IOException {
         removexattr(path, name, options, false);
     }
 
+    /**
+     * @see XAttr4J#removexattr(String, String, int, boolean)
+     */
     public static void removexattr(File file, String name, int options) throws IOException {
         removexattr(file, name, options, false);
     }
@@ -146,30 +174,32 @@ public final class XAttr4J {
     /**
      * List extended attribute names
      *
-     * @param path      -
-     * @param options     listing options
-     * Only XATTR_NOFOLLOW and XATTR_SHOWCOMPRESSION are supported
-     *
-     * @return          Array of exattr names(in arbitrary order)
-     * if have no exattr                an empty array thus returned
-     * if failed to retrieve exattr     IOException will throw
+     * @param path          File path
+     * @param options       listxattr(2) options(Only XATTR_NOFOLLOW, XATTR_SHOWCOMPRESSION supported)
+     * @return              An array of extended attributes(in arbitrary order, empty array is possible)
+     * @throws IOException  If listxattr(2) operation failed
      */
     public static String[] listxattr(String path, int options) throws IOException {
         byte[] path1 = stringToUTF8Bytes(path);
         return _listxattr(path1, options);
     }
 
+    /**
+     * @see XAttr4J#listxattr(String, int)
+     */
     public static String[] listxattr(File file, int options) throws IOException {
         checkNotNull(file);
         return listxattr(file.getAbsolutePath(), options);
     }
 
     /**
-     * Fast wrapper of getxattr(2)
-     * @return      size of the xattr value     possibly zero
-     * @throws      IOException if I/O error or denoted xattr name do not exist
+     * Get an extended attribute value size(fast wrapper of getxattr(2))
      *
-     * This fast wrapper can be used to probe existence of a specific xattr
+     * @param path          File path
+     * @param name          Extended attribute name
+     * @param options       getxattr(2) options
+     * @return              Size of the extended attribute value(possibly zero)
+     * @throws IOException  If getxattr(2) operation failed
      */
     public static long sizexattr(String path, String name, int options) throws IOException {
         byte[] path1 = stringToUTF8Bytes(path);
@@ -177,6 +207,9 @@ public final class XAttr4J {
         return _sizexattr(path1, name1, options);
     }
 
+    /**
+     * @see XAttr4J#sizexattr(String, String, int)
+     */
     public static long sizexattr(File file, String name, int options) throws IOException {
         checkNotNull(file);
         return sizexattr(file.getAbsolutePath(), name, options);
