@@ -60,7 +60,7 @@ You can override the following variables before make:
 
 * Java uses a [Modified UTF-8](https://en.wikipedia.org/wiki/UTF-8#Modified_UTF-8) representation, when you pass a `java.lang.String` down to JNI and use `JNIEnv->GetStringUTFChars` to get its `char *` representation, and use it as first parameter xattr syscalls, you might got errno 2(ENOENT), since aforementioned `char *` is encoded in a modified UTF-8 form.
 
- Hopefully, xattr4j overcome this flaw, we convert it into standard UTF-8 before call down to JNI.
+	Hopefully, xattr4j overcome this flaw, we convert it into standard UTF-8 before call down to JNI.
 
 # TODO
 
