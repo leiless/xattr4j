@@ -27,7 +27,7 @@ public final class XAttr4J {
     }
 
     /*
-     * Those flags can be found at:
+     * Those options can be found at:
      *  xnu/bsd/sys/xattr.h
      *
      * BSD internal require that xattr name should be valid UTF8 sequences(not empty)
@@ -70,87 +70,98 @@ public final class XAttr4J {
     /**
      * Get an extended attribute value
      *
-     * @param path      -
-     * @param name      xattr name to retrieve
-     * @param flags     retrieve options
-     * @return          a byte array contains xattr value
+     * @param path          File path
+     * @param name          Extended attribute name
+     * @param options       getxattr(2) options
+     * @return              A byte array contains extended attribute value
+     * @throws IOException  If getxattr(2) operation failed
      */
-    public static byte[] getxattr(String path, String name, int flags) throws IOException {
+    public static byte[] getxattr(String path, String name, int options) throws IOException {
         byte[] path1 = stringToUTF8Bytes(path);
         byte[] name1 = stringToUTF8Bytes(name);
-        return _getxattr(path1, name1, flags);
-    }
-
-    public static byte[] getxattr(File file, String name, int flags) throws IOException {
-        checkNotNull(file);
-        return getxattr(file.getAbsolutePath(), name, flags);
+        return _getxattr(path1, name1, options);
     }
 
     /**
+     * @see XAttr4J#getxattr(String, String, int)
+     */
+    public static byte[] getxattr(File file, String name, int options) throws IOException {
+        checkNotNull(file);
+        return getxattr(file.getAbsolutePath(), name, options);
+    }
+
+    /**
+     * Set an extended attribute value
+     *
+     * @param path          File path
+     * @param name          Extended attribute name
+     * @param value         Extended attribute value to set
+     * @param options       setxattr(2) options
+     *
      * XXX: Assume value encoded in UTF-8(System.getProperty("file.encoding"))
      */
-    public static void setxattr(String path, String name, byte[] value, int flags) throws IOException {
+    public static void setxattr(String path, String name, byte[] value, int options) throws IOException {
         checkNotNull(value);
         byte[] path1 = stringToUTF8Bytes(path);
         byte[] name1 = stringToUTF8Bytes(name);
-        _setxattr(path1, name1, value, flags);
+        _setxattr(path1, name1, value, options);
     }
 
-    public static void setxattr(File file, String name, byte[] value, int flags) throws IOException {
+    public static void setxattr(File file, String name, byte[] value, int options) throws IOException {
         checkNotNull(file);
-        setxattr(file.getAbsolutePath(), name, value, flags);
+        setxattr(file.getAbsolutePath(), name, value, options);
     }
 
-    public static void setxattr(String path, String name, String value, int flags) throws IOException {
+    public static void setxattr(String path, String name, String value, int options) throws IOException {
         checkNotNull(path);
         checkNotNull(name);
         byte[] value1 = stringToUTF8Bytes(value);
-        setxattr(path, name, value1, flags);
+        setxattr(path, name, value1, options);
     }
 
-    public static void setxattr(File file, String name, String value, int flags) throws IOException {
+    public static void setxattr(File file, String name, String value, int options) throws IOException {
         checkNotNull(file);
-        setxattr(file.getAbsolutePath(), name, value, flags);
+        setxattr(file.getAbsolutePath(), name, value, options);
     }
 
-    public static void removexattr(String path, String name, int flags, boolean force) throws IOException {
+    public static void removexattr(String path, String name, int options, boolean force) throws IOException {
         byte[] path1 = stringToUTF8Bytes(path);
         byte[] name1 = stringToUTF8Bytes(name);
-        _removexattr(path1, name1, flags, force);
+        _removexattr(path1, name1, options, force);
     }
 
-    public static void removexattr(File file, String name, int flags, boolean force) throws IOException {
+    public static void removexattr(File file, String name, int options, boolean force) throws IOException {
         checkNotNull(file);
-        removexattr(file.getAbsolutePath(), name, flags, force);
+        removexattr(file.getAbsolutePath(), name, options, force);
     }
 
-    public static void removexattr(String path, String name, int flags) throws IOException {
-        removexattr(path, name, flags, false);
+    public static void removexattr(String path, String name, int options) throws IOException {
+        removexattr(path, name, options, false);
     }
 
-    public static void removexattr(File file, String name, int flags) throws IOException {
-        removexattr(file, name, flags, false);
+    public static void removexattr(File file, String name, int options) throws IOException {
+        removexattr(file, name, options, false);
     }
 
     /**
      * List extended attribute names
      *
      * @param path      -
-     * @param flags     listing options
+     * @param options     listing options
      * Only XATTR_NOFOLLOW and XATTR_SHOWCOMPRESSION are supported
      *
      * @return          Array of exattr names(in arbitrary order)
      * if have no exattr                an empty array thus returned
      * if failed to retrieve exattr     IOException will throw
      */
-    public static String[] listxattr(String path, int flags) throws IOException {
+    public static String[] listxattr(String path, int options) throws IOException {
         byte[] path1 = stringToUTF8Bytes(path);
-        return _listxattr(path1, flags);
+        return _listxattr(path1, options);
     }
 
-    public static String[] listxattr(File file, int flags) throws IOException {
+    public static String[] listxattr(File file, int options) throws IOException {
         checkNotNull(file);
-        return listxattr(file.getAbsolutePath(), flags);
+        return listxattr(file.getAbsolutePath(), options);
     }
 
     /**
@@ -160,28 +171,28 @@ public final class XAttr4J {
      *
      * This fast wrapper can be used to probe existence of a specific xattr
      */
-    public static long sizexattr(String path, String name, int flags) throws IOException {
+    public static long sizexattr(String path, String name, int options) throws IOException {
         byte[] path1 = stringToUTF8Bytes(path);
         byte[] name1 = stringToUTF8Bytes(name);
-        return _sizexattr(path1, name1, flags);
+        return _sizexattr(path1, name1, options);
     }
 
-    public static long sizexattr(File file, String name, int flags) throws IOException {
+    public static long sizexattr(File file, String name, int options) throws IOException {
         checkNotNull(file);
-        return sizexattr(file.getAbsolutePath(), name, flags);
+        return sizexattr(file.getAbsolutePath(), name, options);
     }
 
     /* Should call in static block and call once */
     private static native void init();
 
-    private static native byte[] _getxattr(byte[] path, byte[] name, int flags) throws IOException;
+    private static native byte[] _getxattr(byte[] path, byte[] name, int options) throws IOException;
 
-    private static native void _setxattr(byte[] path, byte[] name, byte[] value, int flags) throws IOException;
+    private static native void _setxattr(byte[] path, byte[] name, byte[] value, int options) throws IOException;
 
-    private static native void _removexattr(byte[] path, byte[] name, int flags, boolean force) throws IOException;
+    private static native void _removexattr(byte[] path, byte[] name, int options, boolean force) throws IOException;
 
-    private static native String[] _listxattr(byte[] path, int flags) throws IOException;
+    private static native String[] _listxattr(byte[] path, int options) throws IOException;
 
     /* Fast version of getxattr(2) */
-    private static native long _sizexattr(byte[] path, byte[] name, int flags) throws IOException;
+    private static native long _sizexattr(byte[] path, byte[] name, int options) throws IOException;
 }
