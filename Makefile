@@ -20,14 +20,14 @@ CPPFLAGS+=-D__TS__=\"$(TIME_STAMP)\"
 #ARCHS?=-shared -arch i386
 #ARCHS?=-arch x86_64
 ARCHS?=-shared -arch i386 -arch x86_64
-MACOSX_VERSION_MIN=10.6
+MACOSX_VERSION_MIN?=10.6
 CFLAGS+=-Wall -Wextra -Wno-unused-parameter -std=c99 \
 	$(ARCHS) -mmacosx-version-min=$(MACOSX_VERSION_MIN)
 
 SOURCE:=$(wildcard $(PKG_DIR)/*.c)
 LIBNAME:=$(PKG_DIR)/libxattr4j.dylib
 
-all: jar
+all: jar-debug
 
 javac:
 	$(JAVAH) net.trineo.xattr4j.XAttr4J
@@ -57,7 +57,7 @@ jar-core: manifest.txt
 	$(JAVA_HOME)/bin/jar cvfm xattr4j-$(VERSION).jar \
 		manifest.txt $(PKG_DIR)/LibLoader.class $(PKG_DIR)/XAttr4J.class $(LIBNAME)
 
-jar: javac jni-debug jar-core
+jar-debug: javac jni-debug jar-core
 
 jar-release: javac jni-release jar-core
 
