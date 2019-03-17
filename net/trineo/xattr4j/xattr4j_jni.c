@@ -184,7 +184,7 @@ Java_net_trineo_xattr4j_XAttr4J__1getxattr(
         jclass cls,
         jbyteArray jbpath,
         jbyteArray jbname,
-        jint flags)
+        jint options)
 {
     jbyteArray out = NULL;
     char *path;
@@ -206,9 +206,9 @@ Java_net_trineo_xattr4j_XAttr4J__1getxattr(
     }
 
 out_replay:
-    len = getxattr(path, name, NULL, 0, 0, flags);
+    len = getxattr(path, name, NULL, 0, 0, options);
     if (len < 0) {
-        throw_ioexc(env, "getxattr(2) fail  errno: %d flags: %#x name: %s path: %s", errno, flags, name, path);
+        throw_ioexc(env, "getxattr(2) fail  errno: %d options: %#x name: %s path: %s", errno, options, name, path);
         goto out3;
     }
 
@@ -227,7 +227,7 @@ out_replay:
         buff = NULL;
     }
 
-    len2 = getxattr(path, name, buff, len, 0, flags);
+    len2 = getxattr(path, name, buff, len, 0, options);
     if (len2 < 0) {
         if (errno == ERANGE) {
             free(buff);
@@ -235,7 +235,7 @@ out_replay:
             goto out_replay;
         }
 
-        throw_ioexc(env, "getxattr(2) fail  errno: %d flags: %#x len: %zd name: %s path: %s", errno, flags, len, name, path);
+        throw_ioexc(env, "getxattr(2) fail  errno: %d options: %#x len: %zd name: %s path: %s", errno, options, len, name, path);
         goto out4;
     }
 
@@ -266,7 +266,7 @@ Java_net_trineo_xattr4j_XAttr4J__1setxattr(
         jbyteArray jbpath,
         jbyteArray jbname,
         jbyteArray jbvalue,
-        jint flags)
+        jint options)
 {
     char *path;
     char *name;
@@ -293,8 +293,8 @@ Java_net_trineo_xattr4j_XAttr4J__1setxattr(
 
     sz = (*env)->GetArrayLength(env, jbvalue);
 
-    if (setxattr(path, name, value, (size_t) sz, 0, flags) < 0) {
-        throw_ioexc(env, "setxattr(2) fail  errno: %d flags: %#x sz: %d name: %s path: %s", errno, flags, sz, name, path);
+    if (setxattr(path, name, value, (size_t) sz, 0, options) < 0) {
+        throw_ioexc(env, "setxattr(2) fail  errno: %d options: %#x sz: %d name: %s path: %s", errno, options, sz, name, path);
     }
 
     (*env)->ReleaseByteArrayElements(env, jbvalue, value, JNI_ABORT);
@@ -310,7 +310,7 @@ Java_net_trineo_xattr4j_XAttr4J__1removexattr(
         jclass cls,
         jbyteArray jbpath,
         jbyteArray jbname,
-        jint flags,
+        jint options,
         jboolean force)
 {
     char *path;
@@ -328,8 +328,8 @@ Java_net_trineo_xattr4j_XAttr4J__1removexattr(
         goto out;
     }
 
-    if (removexattr(path, name, flags) < 0 && (!force || errno != ENOATTR)) {
-        throw_ioexc(env, "removexattr(2) fail  force: %d errno: %d flags: %#x name: %s path: %s", force, errno, flags, name, path);
+    if (removexattr(path, name, options) < 0 && (!force || errno != ENOATTR)) {
+        throw_ioexc(env, "removexattr(2) fail  force: %d errno: %d options: %#x name: %s path: %s", force, errno, options, name, path);
     }
 
     free(name);
@@ -340,7 +340,7 @@ out:
 /**
  * List extended attribute names for a given path
  * @jbpath      UTF-8 encoded path
- * @flags       Options passed to listxattr(2)
+ * @options     Options passed to listxattr(2)
  * @return      An java.lang.String array contains all extended attribute names
  *              An empty array if given path have no xattr at all
  * @throws      IOException if operation cannot complete or failed
@@ -350,7 +350,7 @@ Java_net_trineo_xattr4j_XAttr4J__1listxattr(
         JNIEnv *env,
         jclass cls,
         jbyteArray jbpath,
-        jint flags)
+        jint options)
 {
     jobjectArray arr = NULL;
     char *path;
@@ -368,9 +368,9 @@ Java_net_trineo_xattr4j_XAttr4J__1listxattr(
     }
 
 out_replay:
-    sz = listxattr(path, NULL, 0, flags);
+    sz = listxattr(path, NULL, 0, options);
     if (sz < 0) {
-        throw_ioexc(env, "listxattr(2) fail  errno: %d flags: %#x path: %s", errno, flags, path);
+        throw_ioexc(env, "listxattr(2) fail  errno: %d options: %#x path: %s", errno, options, path);
         goto out2;
     }
 
@@ -382,19 +382,19 @@ out_replay:
 
     namebuf = (char *) malloc(sz);
     if (namebuf == NULL) {
-        throw_ioexc(env, "malloc(3) fail  errno: %d flags: %#x sz: %zd path: %s", errno, flags, sz, path);
+        throw_ioexc(env, "malloc(3) fail  errno: %d options: %#x sz: %zd path: %s", errno, options, sz, path);
         goto out2;
     }
 
-    sz2 = listxattr(path, namebuf, sz, flags);
+    sz2 = listxattr(path, namebuf, sz, options);
     if (sz2 < 0) {
         if (errno == ERANGE) {
             free(namebuf);
-            LOG("TOCTTOU BUG in listxattr(2)  errno: %d flags: %#x sz: %zd path: %s", errno, flags, sz, path);
+            LOG("TOCTTOU BUG in listxattr(2)  errno: %d options: %#x sz: %zd path: %s", errno, options, sz, path);
             goto out_replay;
         }
 
-        throw_ioexc(env, "listxattr(2) fail  errno: %d flags: %#x sz: %zd path: %s", errno, flags, sz, path);
+        throw_ioexc(env, "listxattr(2) fail  errno: %d options: %#x sz: %zd path: %s", errno, options, sz, path);
         goto out3;
     }
 
@@ -414,8 +414,8 @@ out_replay:
 
     jnamebuf = (jstring *) malloc(sizeof(jstring *) * cnt);
     if (jnamebuf == NULL) {
-        throw_ioexc(env, "malloc(3) fail size: %zu  errno: %d flags: %#x sz: %zd path: %s",
-                            sizeof(jstring *) * cnt, errno, flags, sz, path);
+        throw_ioexc(env, "malloc(3) fail size: %zu  errno: %d options: %#x sz: %zd path: %s",
+                            sizeof(jstring *) * cnt, errno, options, sz, path);
         goto out3;
     }
 
@@ -423,8 +423,8 @@ out_replay:
     for (i = 0; i < cnt; i++) {
         jnamebuf[i] = (*env)->NewStringUTF(env, cursor);
         if (jnamebuf[i] == NULL) {
-            throw_ioexc(env, "JNIEnv->NewStringUTF() fail  i: %zu cursor: %s flags: %#x sz: %zd path: %s",
-                                i, cursor, flags, sz, path);
+            throw_ioexc(env, "JNIEnv->NewStringUTF() fail  i: %zu cursor: %s options: %#x sz: %zd path: %s",
+                                i, cursor, options, sz, path);
             while (i--) (*env)->DeleteLocalRef(env, jnamebuf[i]);
             goto out4;
         }
@@ -433,8 +433,8 @@ out_replay:
 
     arr = (*env)->NewObjectArray(env, cnt, java_lang_String, NULL);
     if (arr == NULL) {
-        throw_ioexc(env, "JNIEnv->NewObjectArray() fail  cnt: %zu flags: %#x sz: %zd path: %s",
-                            cnt, flags, sz, path);
+        throw_ioexc(env, "JNIEnv->NewObjectArray() fail  cnt: %zu options: %#x sz: %zd path: %s",
+                            cnt, options, sz, path);
         goto out4;
     }
 
@@ -470,7 +470,7 @@ Java_net_trineo_xattr4j_XAttr4J__1sizexattr(
         jclass cls,
         jbyteArray jbpath,
         jbyteArray jbname,
-        jint flags)
+        jint options)
 {
     jlong sz = -1;  /* -1 isn't a valid size */
     char *path;
@@ -488,9 +488,9 @@ Java_net_trineo_xattr4j_XAttr4J__1sizexattr(
         goto out2;
     }
 
-    sz = (jlong) getxattr(path, name, NULL, 0, 0, flags);
+    sz = (jlong) getxattr(path, name, NULL, 0, 0, options);
     if (sz < 0) {
-        throw_ioexc(env, "getxattr(2) fail  errno: %d flags: %#x name: %s path: %s", errno, flags, name, path);
+        throw_ioexc(env, "getxattr(2) fail  errno: %d options: %#x name: %s path: %s", errno, options, name, path);
     }
 
     free(name);
