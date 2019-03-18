@@ -17,12 +17,12 @@ CC?=gcc
 TIME_STAMP:=$(shell date +'%Y/%m/%d\ %H:%M:%S%z')
 CPPFLAGS+=-D__TS__=\"$(TIME_STAMP)\"
 
-#ARCHS?=-shared -arch i386
+#ARCHS?=-arch i386
 #ARCHS?=-arch x86_64
-ARCHS?=-shared -arch i386 -arch x86_64
+ARCHS?=-arch i386 -arch x86_64
 MACOSX_VERSION_MIN?=10.6
 CFLAGS+=-Wall -Wextra -Wno-unused-parameter -std=c99 \
-	$(ARCHS) -mmacosx-version-min=$(MACOSX_VERSION_MIN)
+	-shared $(ARCHS) -mmacosx-version-min=$(MACOSX_VERSION_MIN)
 
 SOURCE:=$(wildcard $(PKG_DIR)/*.c)
 LIBNAME:=$(PKG_DIR)/libxattr4j.dylib

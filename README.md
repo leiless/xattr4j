@@ -62,6 +62,12 @@ You can override the following variables before make:
 
 	xattr4j overcomed this flaw, we convert it into standard UTF-8 representation before call down to JNI.
 
+* For macOS >= 10.14, please specify `ARCHS` to `-arch x86_64`, Apple droped `i386` library linkage starting from 10.14.
+
+	```shell
+	ARCHS='-arch x86_64' make
+	```
+
 # TODO
 
 * Support `fd`-oriented `fgetxattr`/`fsetxattr`/`fremovexattr`/`flistxattr` syscalls?
