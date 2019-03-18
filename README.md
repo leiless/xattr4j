@@ -44,6 +44,22 @@ You can override the following variables before make:
 
 * (macOS) `MACOSX_VERSION_MIN` - Minimal macOS version supported(default 10.6)
 
+# Install
+
+Please specify `PREFIX` variable before make, default installation is `~/Library/Java/Extensions`.
+
+```shell
+# Install xattr4j to default location
+make install
+# Uninstall xatt4j from default localtion
+make uninstall
+
+# Install xattr4j to given localtion
+sudo PREFIX=/Library/Java/Extensions make install
+# Uninstall xatt4j from given localtion
+sudo PREFIX=/Library/Java/Extensions make uninstall
+```
+
 # Use of `xattr4j`
 
 **TODO**

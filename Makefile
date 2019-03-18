@@ -27,6 +27,8 @@ CFLAGS+=-Wall -Wextra -Wno-unused-parameter -std=c99 \
 SOURCE:=$(wildcard $(PKG_DIR)/*.c)
 LIBNAME:=$(PKG_DIR)/libxattr4j.dylib
 
+PREFIX?=$(HOME)/Library/Java/Extensions
+
 all: jar-debug
 
 javac:
@@ -62,6 +64,13 @@ jar-debug: javac jni-debug jar-core
 jar-release: javac jni-release jar-core
 
 release: jar-release
+
+install: jar-debug
+	mkdir -p "$(PREFIX)"
+	cp xattr4j-$(VERSION).jar "$(PREFIX)"
+
+uninstall:
+	rm -f "$(PREFIX)"/xattr4j-$(VERSION).jar
 
 clean:
 	rm -f manifest.txt $(PKG_DIR)/*.class $(LIBNAME) *.jar
