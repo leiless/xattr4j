@@ -34,16 +34,13 @@ public final class XAttr4J {
      * see: xnu/bsd/vfs/vfs_xattr.c#xattr_validatename
      */
 
-    /* Don't follow symbolic links */
+    /** Don't follow symbolic links */
     public static final int XATTR_NOFOLLOW = 0x0001;
-    /* Set the value, fail if attr already exists */
+    /** Set the value, fail if attr already exists */
     public static final int XATTR_CREATE   = 0x0002;
-    /* Set the value, fail if attr does not exist */
+    /** Set the value, fail if attr does not exist */
     public static final int XATTR_REPLACE  = 0x0004;
-    /*
-     * option for f/getxattr() and f/listxattr()
-     * to expose the HFS Compression extended attributes
-     */
+    /** Expose HFS+ Compression extended attributes */
     public static final int XATTR_SHOWCOMPRESSION = 0x0020;
 
     private static final String UTF_8 = "UTF-8";
