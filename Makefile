@@ -65,6 +65,10 @@ jar-release: javac jni-release jar-core
 
 release: jar-release
 
+tests:
+	javac -Xlint test/GetxattrTest.java
+	java test/GetxattrTest
+
 install: jar-debug
 	mkdir -p "$(PREFIX)"
 	cp xattr4j-$(VERSION).jar "$(PREFIX)"
