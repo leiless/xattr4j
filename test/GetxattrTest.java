@@ -110,6 +110,10 @@ class GetxattrTest {
             e.printStackTrace();
         }
 
+        String[] ls;
+        ls = XAttr4J.listxattr(f, 0);
+        Preconditions.checkState(ls.length == 0, "Expect zero array length  got %s", ls.length);
+
         try {
             XAttr4J.setxattr(f, "foobar", "deadbeef", 0);
         } catch (IOException e) {
@@ -132,6 +136,10 @@ class GetxattrTest {
         str = stringFromUTF8Bytes(val);
         Preconditions.checkState(str.equals("deadbeef"), "Bad xattr value %s", str);
 
+        ls = XAttr4J.listxattr(f, 0);
+        Preconditions.checkState(ls.length == 1, "Expect array length 1  got %s", ls.length);
+        Preconditions.checkState(ls[0].equals("foobar"));
+
         XAttr4J.removexattr(f, "foobar", 0);
 
         try {
@@ -153,6 +161,9 @@ class GetxattrTest {
             e.printStackTrace();
         }
 
+        ls = XAttr4J.listxattr(f, 0);
+        Preconditions.checkState(ls.length == 0, "Expect zero array length  got %s", ls.length);
+
         ok = f.delete();
         Preconditions.checkState(ok, "%s cannot be deleted", f);
 
@@ -162,6 +173,14 @@ class GetxattrTest {
 
         try {
             XAttr4J.getxattr(f, "foobar", 0);
+        } catch (IOException e) {
+            /* Expect errno 2(ENOENT) */
+            Preconditions.checkState(e.getMessage().contains(" errno: 2 "), "Unexpected exception message: %s", e.getMessage());
+            e.printStackTrace();
+        }
+
+        try {
+            ls = XAttr4J.listxattr(f, 0);
         } catch (IOException e) {
             /* Expect errno 2(ENOENT) */
             Preconditions.checkState(e.getMessage().contains(" errno: 2 "), "Unexpected exception message: %s", e.getMessage());
