@@ -132,9 +132,42 @@ class GetxattrTest {
         str = stringFromUTF8Bytes(val);
         Preconditions.checkState(str.equals("deadbeef"), "Bad xattr value %s", str);
 
+        XAttr4J.removexattr(f, "foobar", 0);
+
+        try {
+            XAttr4J.getxattr(f, "foobar", 0);
+        } catch (IOException e) {
+            /* Expect errno 93(ENOATTR) */
+            Preconditions.checkState(e.getMessage().contains(" errno: 93 "), "Unexpected exception message: %s", e.getMessage());
+            e.printStackTrace();
+        }
+
+        // Force remove a doesn't exist xattr(shouldn't throw IOException)
+        XAttr4J.removexattr(f, "foobar", 0, true);
+
+        try {
+            XAttr4J.removexattr(f, "", 0, true);
+        } catch (IOException e) {
+            /* Expect errno 22(EINVAL)  empty attribute name isn't tolerant even if you turned on force flag */
+            Preconditions.checkState(e.getMessage().contains(" errno: 22 "), "Unexpected exception message: %s", e.getMessage());
+            e.printStackTrace();
+        }
+
         ok = f.delete();
         Preconditions.checkState(ok, "%s cannot be deleted", f);
 
-        System.out.println("Pass!");
+        // Shouldn't throw IOException even if backing file doesn't exist
+        //  this works somewhat like rm(1) -f
+        XAttr4J.removexattr(f, "foobar", 0, true);
+
+        try {
+            XAttr4J.getxattr(f, "foobar", 0);
+        } catch (IOException e) {
+            /* Expect errno 2(ENOENT) */
+            Preconditions.checkState(e.getMessage().contains(" errno: 2 "), "Unexpected exception message: %s", e.getMessage());
+            e.printStackTrace();
+        }
+
+        System.out.println("\nXXX: Pass!");
     }
 }
