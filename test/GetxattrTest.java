@@ -122,6 +122,9 @@ class GetxattrTest {
             e.printStackTrace();
         }
 
+        long sz = XAttr4J.sizexattr(f, "foobar", 0);
+        Preconditions.checkState(sz == 8, "Expect xattr size 8  got %s", sz);
+
         try {
             XAttr4J.getxattr(f, "", 0);
         } catch (IOException e) {
@@ -163,6 +166,9 @@ class GetxattrTest {
 
         ls = XAttr4J.listxattr(f, 0);
         Preconditions.checkState(ls.length == 0, "Expect zero array length  got %s", ls.length);
+
+        boolean exists = XAttr4J.existxattr(f, "foobar", 0);
+        Preconditions.checkState(!exists, "Why xattr foobar still exists?!");
 
         ok = f.delete();
         Preconditions.checkState(ok, "%s cannot be deleted", f);
