@@ -62,11 +62,55 @@ sudo PREFIX=/Library/Java/Extensions make uninstall
 
 # Use of `xattr4j`
 
-**TODO**
+### Get an extended attribute value
+
+```java
+XAttr4J.getxattr(path, xattr_name, options);
+```
+
+### Set an extended attribute value
+
+```java
+XAttr4J.setxattr(path, xattr_name, xattr_value, options);
+```
+
+### Remove an extended attribute value
+
+```java
+// Unforce remove a xattr
+XAttr4J.removexattr(path, xattr_name, options);
+
+// Explicitly provide the force flag
+XAttr4J.removexattr(path, xattr_name, options, is_force);
+```
+
+### List extended attribute names
+
+```java
+XAttr4J.listxattr(path, options);
+```
+
+### Get size of an extended attribute value
+
+```java
+XAttr4J.sizexattr(path, xattr_name, options);
+```
+
+### Check existence of an extended attribute
+
+```java
+XAttr4J.existxattr(path, xattr_name, options);
+```
 
 # Test
 
-**TODO**
+All test cases require [Google's Guava](https://github.com/google/guava) library to compile.
+
+```shell
+make tests
+```
+
+Feel free to [submit an issue](issues/new)(with *bug* label) if any test failed.
 
 # Caveats
 
@@ -92,7 +136,11 @@ sudo PREFIX=/Library/Java/Extensions make uninstall
 
 * Add a `javadoc` target into Makefile?
 
+* Add more sane test cases
+
 * Support for Linux
+
+Feel free to contribute to this repository. :-)
 
 # License
 
