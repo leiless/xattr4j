@@ -67,7 +67,9 @@ release: jar-release
 
 tests:
 	javac -Xlint test/GetxattrTest.java
+	javac -Xlint test/SetxattrTest.java
 	java test/GetxattrTest
+	java test/SetxattrTest
 
 install: jar-debug
 	mkdir -p "$(PREFIX)"
