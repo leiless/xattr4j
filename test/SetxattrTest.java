@@ -129,6 +129,43 @@ class SetxattrTest {
         XAttr4J.removexattr(f, "xattr2", XAttr4J.XATTR_NOFOLLOW);
         XAttr4J.removexattr(f, "xattr3", XAttr4J.XATTR_NOFOLLOW);
         XAttr4J.removexattr(f, "xattr4", XAttr4J.XATTR_NOFOLLOW);
+
+        noFail(f.setReadable(false, true));
+
+        try {
+            XAttr4J.getxattr(f, "xattr5", 0);
+        } catch (IOException e) {
+            assertExMsgContains(e, " errno: 13 ");  // EACCESS
+        }
+
+        noFail(f.setReadable(true, true));
+        noFail(f.setReadable(false, false));
+
+        try {
+            XAttr4J.getxattr(f, "xattr5", 0);
+        } catch (IOException e) {
+            assertExMsgContains(e, " errno: 13 ");
+        }
+
+        noFail(f.setReadable(true, false));
+
+        noFail(f.setWritable(false, true));
+        try {
+            XAttr4J.getxattr(f, "xattr5", 0);
+        } catch (IOException e) {
+            assertExMsgContains(e, " errno: 13 ");
+        }
+
+        noFail(f.setWritable(true, true));
+        noFail(f.setWritable(false, false));
+
+        try {
+            XAttr4J.getxattr(f, "xattr5", 0);
+        } catch (IOException e) {
+            assertExMsgContains(e, " errno: 13 ");
+        }
+
+        noFail(f.setWritable(true, false));
         XAttr4J.removexattr(f, "xattr5", XAttr4J.XATTR_NOFOLLOW);
 
         noFail(f.delete());
