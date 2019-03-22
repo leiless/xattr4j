@@ -68,8 +68,10 @@ release: jar-release
 tests:
 	javac -Xlint test/GetxattrTest.java
 	javac -Xlint test/SetxattrTest.java
+	javac -Xlint test/RemovexattrTest.java
 	java test/GetxattrTest
 	java test/SetxattrTest
+	java test/RemovexattrTest
 
 install: jar-debug
 	mkdir -p "$(PREFIX)"
