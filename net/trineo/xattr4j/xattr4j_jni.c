@@ -589,6 +589,17 @@ out1:
     return arr;
 }
 
+JNIEXPORT jobjectArray JNICALL
+Java_net_trineo_xattr4j_XAttr4J__1flistxattr(
+        JNIEnv *env,
+        jclass cls,
+        jint fd,
+        jint options)
+{
+    throw_ioexc(env, "flistxattr() NYI!");
+    return NULL;
+}
+
 /**
  * Fast wrapper of getxattr(2)
  * @return      size of the xattr value     possibly zero
