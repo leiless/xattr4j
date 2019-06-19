@@ -213,14 +213,14 @@ out_replay:
     }
 
     /*
-     * malloc with zero-size have implementation-defined behaviour
+     * malloc(3) with zero-size have implementation-defined behaviour
      * BSD malloc(3) won't fail in such case
      * see: Open Group Base Specifications - malloc(3)
      */
     if (len != 0) {
         buff = (jbyte *) malloc(len);
         if (buff == NULL) {
-            throw_ioexc(env, "malloc(2) fail  errno: %d len: %zd name: %s path: %s", errno, len, name, path);
+            throw_ioexc(env, "malloc(3) fail  errno: %d len: %zd name: %s path: %s", errno, len, name, path);
             goto out3;
         }
     } else {
