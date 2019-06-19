@@ -591,6 +591,9 @@ out1:
     return arr;
 }
 
+/**
+ * see: Java_net_trineo_xattr4j_XAttr4J__1listxattr()
+ */
 JNIEXPORT jobjectArray JNICALL
 Java_net_trineo_xattr4j_XAttr4J__1flistxattr(
         JNIEnv *env,
@@ -598,8 +601,99 @@ Java_net_trineo_xattr4j_XAttr4J__1flistxattr(
         jint fd,
         jint options)
 {
-    throw_ioexc(env, "flistxattr() NYI!");
-    return NULL;
+    jobjectArray arr = NULL;
+    ssize_t sz;
+    ssize_t sz2;
+    char *namebuf;
+    char *cursor;
+    size_t cnt, i;
+    jstring *jnamebuf;
+
+out_replay:
+    sz = flistxattr(fd, NULL, 0, options);
+    if (sz < 0) {
+        throw_ioexc(env, "flistxattr(2) fail  errno: %d fd: %d options: %#x", errno, fd, options);
+        goto out1;
+    }
+
+    if (sz == 0) {
+        arr = (*env)->NewObjectArray(env, 0, java_lang_String, NULL);
+        if (arr == NULL) throw_ioexc(env, "JNIEnv->NewObjectArray() fail  sz: %zd", sz);
+        goto out1;
+    }
+
+    namebuf = (char *) malloc(sz);
+    if (namebuf == NULL) {
+        throw_ioexc(env, "malloc(3) fail  errno: %d fd: %d options: %#x sz: %zd", errno, fd, options, sz);
+        goto out1;
+    }
+
+    sz2 = flistxattr(fd, namebuf, sz, options);
+    if (sz2 < 0) {
+        if (errno == ERANGE) {
+            free(namebuf);
+            LOG("TOCTTOU BUG in flistxattr(2)  errno: %d fd: %d options: %#x sz: %zd", errno, fd, options, sz);
+            goto out_replay;
+        }
+
+        throw_ioexc(env, "flistxattr(2) fail  errno: %d fd: %d options: %#x sz: %zd", errno, fd, options, sz);
+        goto out2;
+    }
+
+    sz = sz2;       /* NOTE: 0 <= sz2 <= sz */
+    if (sz == 0) {
+        arr = (*env)->NewObjectArray(env, 0, java_lang_String, NULL);
+        if (arr == NULL) throw_ioexc(env, "JNIEnv->NewObjectArray() fail  sz: %zd", sz);
+        goto out2;
+    }
+
+    cnt = 0;
+    cursor = namebuf;
+    do {
+        cnt++;
+        cursor += strlen(cursor) + 1; /* +1 for trailing EOS(end-of-string) */
+    } while (cursor - namebuf < sz);
+
+    jnamebuf = (jstring *) malloc(sizeof(jstring *) * cnt);
+    if (jnamebuf == NULL) {
+        throw_ioexc(env, "malloc(3) fail size: %zu  errno: %d fd: %d options: %#x sz: %zd",
+                            sizeof(jstring *) * cnt, errno, fd, options, sz);
+        goto out2;
+    }
+
+    cursor = namebuf;
+    for (i = 0; i < cnt; i++) {
+        jnamebuf[i] = (*env)->NewStringUTF(env, cursor);
+        if (jnamebuf[i] == NULL) {
+            throw_ioexc(env, "JNIEnv->NewStringUTF() fail  i: %zu cursor: %s fd: %d options: %#x sz: %zd",
+                                i, cursor, fd, options, sz);
+            while (i--) (*env)->DeleteLocalRef(env, jnamebuf[i]);
+            goto out3;
+        }
+        cursor += strlen(cursor) + 1;
+    }
+
+    arr = (*env)->NewObjectArray(env, cnt, java_lang_String, NULL);
+    if (arr == NULL) {
+        /* i must be cnt at this moment */
+        while (i--) (*env)->DeleteLocalRef(env, jnamebuf[i]);
+        throw_ioexc(env, "JNIEnv->NewObjectArray() fail  cnt: %zu fd: %d options: %#x sz: %zd",
+                            cnt, fd, options, sz);
+        goto out3;
+    }
+
+    for (i = 0; i < cnt; i++) {
+        (*env)->SetObjectArrayElement(env, arr, i, jnamebuf[i]);
+        /* see: https://stackoverflow.com/q/4369974/10725426 */
+        (*env)->DeleteLocalRef(env, jnamebuf[i]);
+    }
+
+out3:
+    free(jnamebuf);
+out2:
+    free(namebuf);
+out1:
+    return arr;
 }
 
 /**
