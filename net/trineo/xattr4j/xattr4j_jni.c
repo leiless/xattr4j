@@ -542,10 +542,10 @@ out_replay:
 
     cnt = 0;
     cursor = namebuf;
-    while (cursor - namebuf < sz) {
+    do {
         cnt++;
-        cursor += strlen(cursor) + 1;
-    }
+        cursor += strlen(cursor) + 1; /* +1 for trailing EOS(end-of-string) */
+    } while (cursor - namebuf < sz);
 
     jnamebuf = (jstring *) malloc(sizeof(jstring *) * cnt);
     if (jnamebuf == NULL) {
@@ -568,6 +568,8 @@ out_replay:
 
     arr = (*env)->NewObjectArray(env, cnt, java_lang_String, NULL);
     if (arr == NULL) {
+        /* i must be cnt at this moment */
+        while (i--) (*env)->DeleteLocalRef(env, jnamebuf[i]);
         throw_ioexc(env, "JNIEnv->NewObjectArray() fail  cnt: %zu options: %#x sz: %zd path: %s",
                             cnt, options, sz, path);
         goto out4;
@@ -575,7 +577,7 @@ out_replay:
 
     for (i = 0; i < cnt; i++) {
         (*env)->SetObjectArrayElement(env, arr, i, jnamebuf[i]);
-        /* https://stackoverflow.com/q/4369974/10725426 */
+        /* see: https://stackoverflow.com/q/4369974/10725426 */
         (*env)->DeleteLocalRef(env, jnamebuf[i]);
     }
 
