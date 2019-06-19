@@ -138,8 +138,6 @@ Feel free to [submit an issue](issues/new)(with *bug* label) if any test failed.
 
 * Add more sane test cases
 
-* Support for Linux
-
 Feel free to contribute to this repository. :-)
 
 # License

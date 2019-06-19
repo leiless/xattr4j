@@ -259,6 +259,78 @@ out1:
     return out;
 }
 
+JNIEXPORT jbyteArray JNICALL
+Java_net_trineo_xattr4j_XAttr4J__1fgetxattr(
+        JNIEnv *env,
+        jclass cls,
+        jint fd,
+        jbyteArray bname,
+        jint options)
+{
+    jbyteArray out = NULL;
+    char *name;
+    jbyte *buff;
+    ssize_t len;
+    ssize_t len2;
+
+    name = get_cstr_bytes(env, bname);
+    if (name == NULL) {
+        throw_ioexc(env, "get_cstr_bytes() name fail  errno: %d", errno);
+        goto out1;
+    }
+
+out_replay:
+    len = fgetxattr(fd, name, NULL, 0, 0, options);
+    if (len < 0) {
+        throw_ioexc(env, "fgetxattr(2) fail  errno: %d fd: %d name: %s options: %#x", errno, fd, name, options);
+        goto out2;
+    }
+
+    /*
+     * malloc(3) with zero-size have implementation-defined behaviour
+     * BSD malloc(3) won't fail in such case
+     * see: Open Group Base Specifications - malloc(3)
+     */
+    if (len != 0) {
+        buff = (jbyte *) malloc(len);
+        if (buff == NULL) {
+            throw_ioexc(env, "malloc(3) fail  errno: %d fd: %d name: %s len: %zd", errno, fd, name, len);
+            goto out2;
+        }
+    } else {
+        buff = NULL;
+    }
+
+    len2 = fgetxattr(fd, name, buff, len, 0, options);
+    if (len2 < 0) {
+        if (errno == ERANGE) {
+            free(buff);
+            LOG("TOCTTOU BUG in fgetxattr(2)  errno: %d fd: %d name: %s len: %zd", errno, fd, name, len);
+            goto out_replay;
+        }
+
+        throw_ioexc(env, "fgetxattr(2) fail  errno: %d fd: %d name: %s len: %zd options: %#x", errno, fd, name, len, options);
+        goto out3;
+    }
+
+    len = len2;     /* NOTE: 0 <= len2 <= len */
+
+    /* zero is a valid size in JVM allocator */
+    out = (*env)->NewByteArray(env, len);
+    if (out != NULL) {
+        (*env)->SetByteArrayRegion(env, out, 0, len, buff);
+    } else {
+        throw_ioexc(env, "JNIEnv->NewByteArray() fail  errno: %d fd: %d name: %s len: %zd", errno, fd, name, len);
+    }
+
+out3:
+    free(buff);
+out2:
+    free(name);
+out1:
+    return out;
+}
+
 JNIEXPORT void JNICALL
 Java_net_trineo_xattr4j_XAttr4J__1setxattr(
         JNIEnv *env,
