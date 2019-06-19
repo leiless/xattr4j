@@ -74,9 +74,7 @@ public final class XAttr4J {
      * @throws IOException  If getxattr(2) operation failed
      */
     public static byte[] getxattr(String path, String name, int options) throws IOException {
-        byte[] path1 = stringToUTF8Bytes(path);
-        byte[] name1 = stringToUTF8Bytes(name);
-        return _getxattr(path1, name1, options);
+        return _getxattr(stringToUTF8Bytes(path), stringToUTF8Bytes(name), options);
     }
 
     /**
@@ -108,9 +106,7 @@ public final class XAttr4J {
      */
     public static void setxattr(String path, String name, byte[] value, int options) throws IOException {
         checkNotNull(value);
-        byte[] path1 = stringToUTF8Bytes(path);
-        byte[] name1 = stringToUTF8Bytes(name);
-        _setxattr(path1, name1, value, options);
+        _setxattr(stringToUTF8Bytes(path), stringToUTF8Bytes(name), value, options);
     }
 
     /**
@@ -125,10 +121,7 @@ public final class XAttr4J {
      * @see XAttr4J#setxattr(String, String, byte[], int)
      */
     public static void setxattr(String path, String name, String value, int options) throws IOException {
-        checkNotNull(path);
-        checkNotNull(name);
-        byte[] value1 = stringToUTF8Bytes(value);
-        setxattr(path, name, value1, options);
+        setxattr(path, name, stringToUTF8Bytes(value), options);
     }
 
     /**
@@ -164,9 +157,7 @@ public final class XAttr4J {
      * @throws IOException  If removexattr(2) operation failed
      */
     public static void removexattr(String path, String name, int options, boolean force) throws IOException {
-        byte[] path1 = stringToUTF8Bytes(path);
-        byte[] name1 = stringToUTF8Bytes(name);
-        _removexattr(path1, name1, options, force);
+        _removexattr(stringToUTF8Bytes(path), stringToUTF8Bytes(name), options, force);
     }
 
     /**
@@ -215,8 +206,7 @@ public final class XAttr4J {
      * @throws IOException  If listxattr(2) operation failed
      */
     public static String[] listxattr(String path, int options) throws IOException {
-        byte[] path1 = stringToUTF8Bytes(path);
-        return _listxattr(path1, options);
+        return _listxattr(stringToUTF8Bytes(path), options);
     }
 
     /**
@@ -245,9 +235,7 @@ public final class XAttr4J {
      * @throws IOException  If getxattr(2) operation failed
      */
     public static long sizexattr(String path, String name, int options) throws IOException {
-        byte[] path1 = stringToUTF8Bytes(path);
-        byte[] name1 = stringToUTF8Bytes(name);
-        return _sizexattr(path1, name1, options);
+        return _sizexattr(stringToUTF8Bytes(path), stringToUTF8Bytes(name), options);
     }
 
     /**
@@ -277,9 +265,7 @@ public final class XAttr4J {
      *                      If given path doesn't exist  IOException will throw
      */
     public static boolean existxattr(String path, String name, int options) throws IOException {
-        byte[] path1 = stringToUTF8Bytes(path);
-        byte[] name1 = stringToUTF8Bytes(name);
-        return _existxattr(path1, name1, options);
+        return _existxattr(stringToUTF8Bytes(path), stringToUTF8Bytes(name), options);
     }
 
     /**
