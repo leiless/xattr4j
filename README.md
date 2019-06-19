@@ -118,13 +118,13 @@ Feel free to [submit an issue](issues/new)(with *bug* label) if any test failed.
 
 # Caveats
 
-* This xattr4j implementation claims to be compatible with [UserDefinedFileAttributeView](https://docs.oracle.com/javase/7/docs/api/java/nio/file/attribute/UserDefinedFileAttributeView.html)
+* This `xattr4j` implementation claims to be compatible with [UserDefinedFileAttributeView](https://docs.oracle.com/javase/7/docs/api/java/nio/file/attribute/UserDefinedFileAttributeView.html).
 
-* (macOS) Some file systems don't support xattr syscalls, Apple alternatively use a [AppleDouble format](https://en.wikipedia.org/wiki/AppleSingle_and_AppleDouble_formats) for remedy, when you use any xattr syscalls for AppleDouble format file, you'll got a errno 1(EPERM).
+* (macOS) Some file systems don't support xattr syscalls, Apple alternatively use a [AppleDouble format](https://en.wikipedia.org/wiki/AppleSingle_and_AppleDouble_formats) for remedy, when you use any xattr syscalls for AppleDouble format file(or any `fd` backed by such a file), you'll got an errno 1([EPERM](https://opensource.apple.com/source/xnu/xnu-4570.71.2/bsd/sys/errno.h.auto.html)).
 
 * Java uses a [Modified UTF-8](https://en.wikipedia.org/wiki/UTF-8#Modified_UTF-8) representation, when you pass a `java.lang.String` down to JNI and use `JNIEnv->GetStringUTFChars` to get its `char *` representation, and use it as first parameter xattr syscalls, you might got errno 2(ENOENT), since aforementioned `char *` is encoded in a modified UTF-8 form.
 
-	xattr4j overcomed this flaw, we convert it into standard UTF-8 representation before call down to JNI.
+	`xattr4j` overcomed this flaw, we convert it into standard UTF-8 representation before call down to JNI.
 
 * For macOS >= 10.14, please specify `ARCHS` to `-arch x86_64`, Apple droped `i386` library linkage starting from 10.14.
 
@@ -139,6 +139,8 @@ Feel free to [submit an issue](issues/new)(with *bug* label) if any test failed.
 * Add a `javadoc` target into Makefile?
 
 * Add more sane test cases
+
+* Instead of throw an `IOException`, we may instead implement a `SyscallErrorException`, and wrap up an `errno` when we throw such exception.
 
 Feel free to contribute to this repository. :-)
 
