@@ -664,7 +664,8 @@ out:
 
 JNIEXPORT jboolean JNICALL
 Java_net_trineo_xattr4j_XAttr4J__1existxattr(
-        JNIEnv *env, jclass cls,
+        JNIEnv *env,
+        jclass cls,
         jbyteArray jbpath,
         jbyteArray jbname,
         jint options)
@@ -695,6 +696,34 @@ Java_net_trineo_xattr4j_XAttr4J__1existxattr(
 out2:
     free(path);
 out1:
+    return exists;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_net_trineo_xattr4j_XAttr4J__1fexistxattr(
+        JNIEnv *env,
+        jclass cls,
+        jint fd,
+        jbyteArray bname,
+        jint options)
+{
+    jboolean exists = JNI_FALSE;
+    char *name;
+
+    name = get_cstr_bytes(env, bname);
+    if (name == NULL) {
+        throw_ioexc(env, "get_cstr_bytes() `name' fail  errno: %d", errno);
+        goto out;
+    }
+
+    exists = fgetxattr(fd, name, NULL, 0, 0, options) >= 0;
+    if (!exists && errno != ENOATTR) {
+        /* Will throw if given `fd' isn't valid(EBADF) */
+        throw_ioexc(env, "fgetxattr(2) fail  errno: %d fd:%d name: %s options: %#x", errno, fd, name, options);
+    }
+
+    free(name);
+out:
     return exists;
 }
 
