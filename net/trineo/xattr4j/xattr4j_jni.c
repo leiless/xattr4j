@@ -402,7 +402,7 @@ Java_net_trineo_xattr4j_XAttr4J__1fsetxattr(
     }
 
     sz = (*env)->GetArrayLength(env, bvalue);
-    if (fsetxattr(fd, name, value, (size_t) sz, 0, options) < 0) { 
+    if (fsetxattr(fd, name, value, (size_t) sz, 0, options) < 0) {
         throw_ioexc(env, "fsetxattr(2) fail  errno: %d fd: %d name: %s sz: %d options: %#x", errno, fd, name, sz, options);
     }
 
@@ -444,6 +444,32 @@ Java_net_trineo_xattr4j_XAttr4J__1removexattr(
     free(name);
 out:
     free(path);
+}
+
+JNIEXPORT void JNICALL
+Java_net_trineo_xattr4j_XAttr4J__1fremovexattr(
+        JNIEnv *env,
+        jclass cls,
+        jint fd,
+        jbyteArray bname,
+        jint options,
+        jboolean force)
+{
+    int e;
+    char *name;
+
+    name = get_cstr_bytes(env, bname);
+    if (name == NULL) {
+        throw_ioexc(env, "get_cstr_bytes() `name' fail  errno: %d", errno);
+        return;
+    }
+
+    e = fremovexattr(fd, name, options);
+    if (e != 0 && (!force || (errno != ENOENT && errno != ENOATTR))) {
+        throw_ioexc(env, "fremovexattr(2) fail  errno: %d fd: %d name: %s options: %#x force: %d", errno, fd, name, options, force);
+    }
+
+    free(name);
 }
 
 /**
