@@ -635,6 +635,33 @@ out1:
     return sz;
 }
 
+JNIEXPORT jlong JNICALL
+Java_net_trineo_xattr4j_XAttr4J__1fsizexattr(
+        JNIEnv *env,
+        jclass cls,
+        jint fd,
+        jbyteArray bname,
+        jint options)
+{
+    jlong sz = -1;  /* -1 isn't a valid size */
+    char *name;
+
+    name = get_cstr_bytes(env, bname);
+    if (name == NULL) {
+        throw_ioexc(env, "get_cstr_bytes() `name' fail  errno: %d", errno);
+        goto out;
+    }
+
+    sz = (jlong) fgetxattr(fd, name, NULL, 0, 0, options);
+    if (sz < 0) {
+        throw_ioexc(env, "fgetxattr(2) fail  errno: %d fd: %d name: %s options: %#x", errno, fd, name, options);
+    }
+
+    free(name);
+out:
+    return sz;
+}
+
 JNIEXPORT jboolean JNICALL
 Java_net_trineo_xattr4j_XAttr4J__1existxattr(
         JNIEnv *env, jclass cls,
