@@ -88,6 +88,14 @@ public final class XAttr4J {
     }
 
     /**
+     * Get an extended attribute value(fd-oriented)
+     * @see XAttr4J#getxattr(String, String, int)
+     */
+    public static byte[] fgetxattr(int fd, String name, int options) throws IOException {
+        return _fgetxattr(fd, stringToUTF8Bytes(name), options);
+    }
+
+    /**
      * Set an extended attribute value
      *
      * @param path          File path
@@ -132,6 +140,21 @@ public final class XAttr4J {
     }
 
     /**
+     * Set an extended attribute value(fd-oriented)
+     */
+    public static void fsetxattr(int fd, String name, byte[] value, int options) throws IOException {
+        checkNotNull(value);
+        _fsetxattr(fd, stringToUTF8Bytes(name), value, options);
+    }
+
+    /**
+     * @see XAttr4J#fsetxattr(int, String, byte[], int)
+     */
+    public static void fsetxattr(int fd, String name, String value, int options) throws IOException {
+        fsetxattr(fd, name, stringToUTF8Bytes(value), options);
+    }
+
+    /**
      * Remove an extended attribute value
      *
      * @param path          File path
@@ -169,6 +192,21 @@ public final class XAttr4J {
     }
 
     /**
+     * Remove an extended attribute(fd-oriented)
+     * @see XAttr4J#removexattr(String, String, int, boolean)
+     */
+    public static void fremovexattr(int fd, String name, int options, boolean force) throws IOException {
+        _fremovexattr(fd, stringToUTF8Bytes(name), options, force);
+    }
+
+    /**
+     * @see XAttr4J#fremovexattr(int, String, int, boolean)
+     */
+    public static void fremovexattr(int fd, String name, int options) throws IOException {
+        fremovexattr(fd, name, options, false);
+    }
+
+    /**
      * List extended attribute names
      *
      * @param path          File path
@@ -187,6 +225,14 @@ public final class XAttr4J {
     public static String[] listxattr(File file, int options) throws IOException {
         checkNotNull(file);
         return listxattr(file.getAbsolutePath(), options);
+    }
+
+    /**
+     * List extended attribute names(fd-oriented)
+     * @see XAttr4J#listxattr(String, int)
+     */
+    public static String[] flistxattr(int fd, int options) throws IOException {
+        return _flistxattr(fd, options);
     }
 
     /**
@@ -213,6 +259,14 @@ public final class XAttr4J {
     }
 
     /**
+     * Get an extended attribute value size(fast wrapper of fgetxattr(2))
+     * @see XAttr4J#sizexattr(String, String, int)
+     */
+    public static long fsizexattr(int fd, String name, int options) throws IOException {
+        return _fsizexattr(fd, stringToUTF8Bytes(name), options);
+    }
+
+    /**
      * Check if an extended attribute exists
      *
      * @param path          File path
@@ -236,19 +290,34 @@ public final class XAttr4J {
         return existxattr(file.getAbsolutePath(), name, options);
     }
 
+    /**
+     * Check if an extended attribute exists(fd-oriented)
+     * @see XAttr4J#existxattr(String, String, int)
+     */
+    public static boolean fexistxattr(int fd, String name, int options) throws IOException {
+        return _fexistxattr(fd, stringToUTF8Bytes(name), options);
+    }
+
     /* Should call in static block and call once */
     private static native void init();
 
     private static native byte[] _getxattr(byte[] path, byte[] name, int options) throws IOException;
+    private static native byte[] _fgetxattr(int fd, byte[] name, int options) throws IOException;
 
     private static native void _setxattr(byte[] path, byte[] name, byte[] value, int options) throws IOException;
+    private static native void _fsetxattr(int fd, byte[] name, byte[] value, int options) throws IOException;
 
     private static native void _removexattr(byte[] path, byte[] name, int options, boolean force) throws IOException;
+    private static native void _fremovexattr(int fd, byte[] name, int options, boolean force) throws IOException;
 
     private static native String[] _listxattr(byte[] path, int options) throws IOException;
+    private static native String[] _flistxattr(int fd, int options) throws IOException;
 
     /* Fast version of getxattr(2) */
     private static native long _sizexattr(byte[] path, byte[] name, int options) throws IOException;
+    /* Fast version of fgetxattr(2) */
+    private static native long _fsizexattr(int fd, byte[] name, int options) throws IOException;
 
     private static native boolean _existxattr(byte[] path, byte[] name, int options) throws IOException;
+    private static native boolean _fexistxattr(int fd, byte[] name, int options) throws IOException;
 }

@@ -33,11 +33,27 @@ JNIEXPORT jbyteArray JNICALL Java_net_trineo_xattr4j_XAttr4J__1getxattr
 
 /*
  * Class:     net_trineo_xattr4j_XAttr4J
+ * Method:    _fgetxattr
+ * Signature: (I[BI)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_net_trineo_xattr4j_XAttr4J__1fgetxattr
+  (JNIEnv *, jclass, jint, jbyteArray, jint);
+
+/*
+ * Class:     net_trineo_xattr4j_XAttr4J
  * Method:    _setxattr
  * Signature: ([B[B[BI)V
  */
 JNIEXPORT void JNICALL Java_net_trineo_xattr4j_XAttr4J__1setxattr
   (JNIEnv *, jclass, jbyteArray, jbyteArray, jbyteArray, jint);
+
+/*
+ * Class:     net_trineo_xattr4j_XAttr4J
+ * Method:    _fsetxattr
+ * Signature: (I[B[BI)V
+ */
+JNIEXPORT void JNICALL Java_net_trineo_xattr4j_XAttr4J__1fsetxattr
+  (JNIEnv *, jclass, jint, jbyteArray, jbyteArray, jint);
 
 /*
  * Class:     net_trineo_xattr4j_XAttr4J
@@ -49,11 +65,27 @@ JNIEXPORT void JNICALL Java_net_trineo_xattr4j_XAttr4J__1removexattr
 
 /*
  * Class:     net_trineo_xattr4j_XAttr4J
+ * Method:    _fremovexattr
+ * Signature: (I[BIZ)V
+ */
+JNIEXPORT void JNICALL Java_net_trineo_xattr4j_XAttr4J__1fremovexattr
+  (JNIEnv *, jclass, jint, jbyteArray, jint, jboolean);
+
+/*
+ * Class:     net_trineo_xattr4j_XAttr4J
  * Method:    _listxattr
  * Signature: ([BI)[Ljava/lang/String;
  */
 JNIEXPORT jobjectArray JNICALL Java_net_trineo_xattr4j_XAttr4J__1listxattr
   (JNIEnv *, jclass, jbyteArray, jint);
+
+/*
+ * Class:     net_trineo_xattr4j_XAttr4J
+ * Method:    _flistxattr
+ * Signature: (II)[Ljava/lang/String;
+ */
+JNIEXPORT jobjectArray JNICALL Java_net_trineo_xattr4j_XAttr4J__1flistxattr
+  (JNIEnv *, jclass, jint, jint);
 
 /*
  * Class:     net_trineo_xattr4j_XAttr4J
@@ -65,11 +97,27 @@ JNIEXPORT jlong JNICALL Java_net_trineo_xattr4j_XAttr4J__1sizexattr
 
 /*
  * Class:     net_trineo_xattr4j_XAttr4J
+ * Method:    _fsizexattr
+ * Signature: (I[BI)J
+ */
+JNIEXPORT jlong JNICALL Java_net_trineo_xattr4j_XAttr4J__1fsizexattr
+  (JNIEnv *, jclass, jint, jbyteArray, jint);
+
+/*
+ * Class:     net_trineo_xattr4j_XAttr4J
  * Method:    _existxattr
  * Signature: ([B[BI)Z
  */
 JNIEXPORT jboolean JNICALL Java_net_trineo_xattr4j_XAttr4J__1existxattr
   (JNIEnv *, jclass, jbyteArray, jbyteArray, jint);
+
+/*
+ * Class:     net_trineo_xattr4j_XAttr4J
+ * Method:    _fexistxattr
+ * Signature: (I[BI)Z
+ */
+JNIEXPORT jboolean JNICALL Java_net_trineo_xattr4j_XAttr4J__1fexistxattr
+  (JNIEnv *, jclass, jint, jbyteArray, jint);
 
 #ifdef __cplusplus
 }
