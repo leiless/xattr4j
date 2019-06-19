@@ -377,6 +377,41 @@ out1:
 }
 
 JNIEXPORT void JNICALL
+Java_net_trineo_xattr4j_XAttr4J__1fsetxattr(
+        JNIEnv *env,
+        jclass cls,
+        jint fd,
+        jbyteArray bname,
+        jbyteArray bvalue,
+        jint options)
+{
+    char *name;
+    jbyte *value;
+    jsize sz;
+
+    name = get_cstr_bytes(env, bname);
+    if (name == NULL) {
+        throw_ioexc(env, "get_cstr_bytes() `name' fail  errno: %d", errno);
+        return;
+    }
+
+    value = (*env)->GetByteArrayElements(env, bvalue, NULL);
+    if (value == NULL) {
+        throw_ioexc(env, "JNIEnv->GetByteArrayElements() `value' fail  fd: %d name: %s", fd, name);
+        goto out;
+    }
+
+    sz = (*env)->GetArrayLength(env, bvalue);
+    if (fsetxattr(fd, name, value, (size_t) sz, 0, options) < 0) { 
+        throw_ioexc(env, "fsetxattr(2) fail  errno: %d fd: %d name: %s sz: %d options: %#x", errno, fd, name, sz, options);
+    }
+
+    (*env)->ReleaseByteArrayElements(env, bvalue, value, JNI_ABORT);
+out:
+    free(name);
+}
+
+JNIEXPORT void JNICALL
 Java_net_trineo_xattr4j_XAttr4J__1removexattr(
         JNIEnv *env,
         jclass cls,
