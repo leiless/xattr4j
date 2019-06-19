@@ -5,7 +5,7 @@
 #
 
 # Used to denote XAttr4J implementation version
-VERSION:=0.1
+VERSION:=0.5
 
 JAVA_VERSION?=1.7
 JAVA_HOME?=$(shell /usr/libexec/java_home -v $(JAVA_VERSION))

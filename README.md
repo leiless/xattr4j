@@ -102,6 +102,10 @@ XAttr4J.sizexattr(path, xattr_name, options);
 XAttr4J.existxattr(path, xattr_name, options);
 ```
 
+&nbsp;
+
+There're also [fd](https://en.wikipedia.org/wiki/File_descriptor)-oriented xattr operations, i.e. `fgetxattr`, `fsetxattr`, `fremovexattr`, `flistxattr`, `fsizexattr`, `fexistxattr` are available, usage omitted(similar to path-oriented xattr operations).
+
 # Test
 
 All test cases require [Google's Guava](https://github.com/google/guava) library to compile.
@@ -129,8 +133,6 @@ Feel free to [submit an issue](issues/new)(with *bug* label) if any test failed.
 	```
 
 # TODO
-
-* Support `fd`-oriented `fgetxattr`/`fsetxattr`/`fremovexattr`/`flistxattr` syscalls?
 
 * (macOS) Add a JNI function to retrieve result of `pathconf(path, _PC_XATTR_SIZE_BITS)`?
 
