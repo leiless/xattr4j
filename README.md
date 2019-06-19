@@ -134,13 +134,13 @@ Feel free to [submit an issue](issues/new)(with *bug* label) if any test failed.
 
 # TODO
 
-* (macOS) Add a JNI function to retrieve result of `pathconf(path, _PC_XATTR_SIZE_BITS)`?
+* (macOS) Add a JNI function to retrieve result of `pathconf(path, _PC_XATTR_SIZE_BITS)` and `fpathconf(fd, _PC_XATTR_SIZE_BITS)`?
 
 * Add a `javadoc` target into Makefile?
 
 * Add more sane test cases
 
-* Instead of throw an `IOException`, we may instead implement a `SyscallErrorException`, and wrap up an `errno` when we throw such exception.
+* Instead of throw an `IOException`, we may instead implement a `SystemErrorException`, and wrap up an `errno` when we throw such exception.
 
 Feel free to contribute to this repository. :-)
 
