@@ -299,6 +299,13 @@ public final class XAttr4J {
         return xattrsizebits(file.getAbsolutePath());
     }
 
+    /**
+     * @see XAttr4J#xattrsizebits(String)
+     */
+    public static long fxattrsizebits(int fd) throws IOException {
+        return _fxattrsizebits(fd);
+    }
+
     /* Should call in static block and call once */
     private static native void init();
 
@@ -323,5 +330,6 @@ public final class XAttr4J {
     private static native boolean _fexistxattr(int fd, byte[] name, int options) throws IOException;
 
     private static native long _xattrsizebits(byte[] path) throws IOException;
+    private static native long _fxattrsizebits(int fd) throws IOException;
 }
 

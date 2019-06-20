@@ -861,3 +861,21 @@ out:
     return bits;    /* Possibly be -1? */
 }
 
+JNIEXPORT jlong JNICALL
+Java_net_trineo_xattr4j_XAttr4J__1fxattrsizebits(
+        JNIEnv *env,
+        jclass cls,
+        jint fd)
+{
+    long bits = -1;
+
+    errno = 0;
+    bits = fpathconf(fd, _PC_XATTR_SIZE_BITS);
+    /* see: fpathconf(2) RETURN VALUES */
+    if (bits < 0 && errno != 0) {
+        throw_ioexc(env, "fpathconf(2) fail  errno: %d fd: %d", errno, fd);
+    }
+
+    return bits;    /* Possibly be -1? */
+}
+

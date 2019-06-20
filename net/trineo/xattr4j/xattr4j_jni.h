@@ -127,6 +127,14 @@ JNIEXPORT jboolean JNICALL Java_net_trineo_xattr4j_XAttr4J__1fexistxattr
 JNIEXPORT jlong JNICALL Java_net_trineo_xattr4j_XAttr4J__1xattrsizebits
   (JNIEnv *, jclass, jbyteArray);
 
+/*
+ * Class:     net_trineo_xattr4j_XAttr4J
+ * Method:    _fxattrsizebits
+ * Signature: (I)J
+ */
+JNIEXPORT jlong JNICALL Java_net_trineo_xattr4j_XAttr4J__1fxattrsizebits
+  (JNIEnv *, jclass, jint);
+
 #ifdef __cplusplus
 }
 #endif
