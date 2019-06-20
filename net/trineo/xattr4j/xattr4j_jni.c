@@ -834,3 +834,30 @@ out:
     return exists;
 }
 
+JNIEXPORT jlong JNICALL
+Java_net_trineo_xattr4j_XAttr4J__1xattrsizebits(
+        JNIEnv *env,
+        jclass cls,
+        jbyteArray bpath)
+{
+    long bits = -1;
+    char *path;
+
+    path = get_cstr_bytes(env, bpath);
+    if (path == NULL) {
+        throw_ioexc(env, "get_cstr_bytes() `path' fail  errno: %d", errno);
+        goto out;
+    }
+
+    errno = 0;
+    bits = pathconf(path, _PC_XATTR_SIZE_BITS);
+    /* see: pathconf(2) RETURN VALUES */
+    if (bits < 0 && errno != 0) {
+        throw_ioexc(env, "pathconf(2) fail  errno: %d path: %s", errno, path);
+    }
+
+    free(path);
+out:
+    return bits;    /* Possibly be -1? */
+}
+

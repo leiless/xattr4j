@@ -284,6 +284,21 @@ public final class XAttr4J {
         return _fexistxattr(fd, stringToUTF8Bytes(name), options);
     }
 
+    /**
+     * @return  number of bits used to store maximum extended attribute size in bytes
+     */
+    public static long xattrsizebits(String path) throws IOException {
+        return _xattrsizebits(stringToUTF8Bytes(path));
+    }
+
+    /**
+     * @see XAttr4J#xattrsizebits(String)
+     */
+    public static long xattrsizebits(File file) throws IOException {
+        checkNotNull(file);
+        return xattrsizebits(file.getAbsolutePath());
+    }
+
     /* Should call in static block and call once */
     private static native void init();
 
@@ -306,4 +321,7 @@ public final class XAttr4J {
 
     private static native boolean _existxattr(byte[] path, byte[] name, int options) throws IOException;
     private static native boolean _fexistxattr(int fd, byte[] name, int options) throws IOException;
+
+    private static native long _xattrsizebits(byte[] path) throws IOException;
 }
+
