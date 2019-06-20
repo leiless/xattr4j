@@ -69,9 +69,11 @@ tests:
 	javac -Xlint test/GetxattrTest.java
 	javac -Xlint test/SetxattrTest.java
 	javac -Xlint test/RemovexattrTest.java
+	javac -Xlint test/XattrSizeBits.java
 	java test/GetxattrTest
 	java test/SetxattrTest
 	java test/RemovexattrTest
+	java test/XattrSizeBits
 
 install: jar-debug
 	mkdir -p "$(PREFIX)"
@@ -83,4 +85,5 @@ uninstall:
 clean:
 	rm -f manifest.txt $(PKG_DIR)/*.class $(LIBNAME) *.jar
 	rm -rf $(LIBNAME).dSYM
+	rm -f test/*.class
 

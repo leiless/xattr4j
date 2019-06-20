@@ -66,40 +66,54 @@ sudo PREFIX=/Library/Java/Extensions make uninstall
 
 ```java
 XAttr4J.getxattr(path, xattr_name, options);
+XAttr4J.fgetxattr(fd, xattr_name, options);
 ```
 
 ### Set an extended attribute value
 
 ```java
 XAttr4J.setxattr(path, xattr_name, xattr_value, options);
+XAttr4J.fsetxattr(fd, xattr_name, xattr_value, options);
 ```
 
 ### Remove an extended attribute value
 
 ```java
-// Unforce remove a xattr
-XAttr4J.removexattr(path, xattr_name, options);
-
-// Explicitly provide the force flag
+// Remove a xattr(explicitly provide the is_force flag)
 XAttr4J.removexattr(path, xattr_name, options, is_force);
+XAttr4J.fremovexattr(fd, xattr_name, options, is_force);
+
+// Ditto.(is_force = false)
+XAttr4J.removexattr(path, xattr_name, options);
+XAttr4J.fremovexattr(fd, xattr_name, options);
 ```
 
 ### List extended attribute names
 
 ```java
 XAttr4J.listxattr(path, options);
+XAttr4J.flistxattr(fd, options);
 ```
 
 ### Get size of an extended attribute value
 
 ```java
 XAttr4J.sizexattr(path, xattr_name, options);
+XAttr4J.fsizexattr(fd, xattr_name, options);
 ```
 
 ### Check existence of an extended attribute
 
 ```java
 XAttr4J.existxattr(path, xattr_name, options);
+XAttr4J.fexistxattr(fd, xattr_name, options);
+```
+
+### Get maximum extended attribute value size in bytes
+
+```java
+XAttr4J.xattrsizebits(path);
+XAttr4J.fxattrsizebits(fd);
 ```
 
 &nbsp;
@@ -134,13 +148,13 @@ Feel free to [submit an issue](issues/new)(with *bug* label) if any test failed.
 
 # TODO
 
-* (macOS) Add a JNI function to retrieve result of `pathconf(path, _PC_XATTR_SIZE_BITS)` and `fpathconf(fd, _PC_XATTR_SIZE_BITS)`?
+[x] (macOS) Add a JNI function to retrieve result of `pathconf(path, _PC_XATTR_SIZE_BITS)` and `fpathconf(fd, _PC_XATTR_SIZE_BITS)`?
 
-* Add a `javadoc` target into Makefile?
+[ ] Add a `javadoc` target into Makefile?
 
-* Add more sane test cases
+[ ] Add more sane test cases
 
-* Instead of throw an `IOException`, we may instead implement a `SystemErrorException`, and wrap up an `errno` when we throw such exception.
+[ ] Instead of throw an `IOException`, we may instead implement a `SystemErrorException`, and wrap up an `errno` when we throw such exception.
 
 Feel free to contribute to this repository. :-)
 
